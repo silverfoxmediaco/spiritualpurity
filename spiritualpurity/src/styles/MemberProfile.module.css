@@ -1,0 +1,595 @@
+/* src/styles/MemberProfile.module.css */
+
+.memberProfilePage {
+    font-family: 'Poppins', sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  }
+  
+  .loadingContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    color: #64748b;
+  }
+  
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e2e8f0;
+    border-top: 4px solid #f59e0b;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .errorContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    padding: 2rem;
+  }
+  
+  .errorMessage {
+    background-color: #fee2e2;
+    color: #dc2626;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    text-align: center;
+    border: 1px solid #fecaca;
+  }
+  
+  .backButton {
+    background-color: #404040;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    transition: background-color 0.3s ease;
+  }
+  
+  .backButton:hover {
+    background-color: #525252;
+  }
+  
+  .profileContainer {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    margin: 2rem auto;
+    max-width: 1000px;
+    overflow: hidden;
+  }
+  
+  /* Profile Header */
+  .profileHeader {
+    background: linear-gradient(135deg, #404040 0%, #525252 100%);
+    color: white;
+    padding: 2rem;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 2rem;
+    align-items: center;
+  }
+  
+  .profilePictureSection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .profilePictureWrapper {
+    position: relative;
+    width: 120px;
+    height: 120px;
+  }
+  
+  .profilePicture {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .defaultAvatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 4px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .defaultAvatar .material-icons {
+    font-size: 48px;
+    color: rgba(255, 255, 255, 0.8);
+  }
+  
+  .uploadSection {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+  }
+  
+  .uploadButton {
+    background: #f59e0b;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+    border: none;
+    text-decoration: none;
+    display: inline-block;
+  }
+  
+  .uploadButton:hover {
+    background: #d97706;
+  }
+  
+  .saveButton {
+    background: #10b981;
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+  }
+  
+  .saveButton:hover {
+    background: #059669;
+  }
+  
+  .saveButton:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+  }
+  
+  .profileInfo {
+    flex: 1;
+  }
+  
+  .profileInfo h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+    font-weight: 600;
+  }
+  
+  .memberSince {
+    margin: 0 0 1rem 0;
+    opacity: 0.9;
+    font-size: 0.875rem;
+  }
+  
+  .relationshipStatus,
+  .location {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+    opacity: 0.9;
+  }
+  
+  .relationshipStatus .material-icons,
+  .location .material-icons {
+    font-size: 18px;
+  }
+  
+  .headerActions {
+    display: flex;
+    align-items: center;
+  }
+  
+  .editButton {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  
+  .editButton:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+  
+  /* Profile Content */
+  .profileContent {
+    padding: 2rem;
+  }
+  
+  /* Edit Form */
+  .editForm {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .formGrid {
+    display: grid;
+    gap: 2rem;
+  }
+  
+  .formSection {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .formSection h3 {
+    margin: 0 0 1.5rem 0;
+    color: #404040;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+  
+  .formRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  
+  .formGroup {
+    margin-bottom: 1rem;
+  }
+  
+  .formGroup label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #374151;
+  }
+  
+  .formGroup input,
+  .formGroup textarea,
+  .formGroup select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+    transition: border-color 0.3s ease;
+  }
+  
+  .formGroup input:focus,
+  .formGroup textarea:focus,
+  .formGroup select:focus {
+    outline: none;
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+  }
+  
+  .privacyOptions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .checkboxLabel {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    font-weight: 400;
+  }
+  
+  .checkboxLabel input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+    transform: scale(1.2);
+    accent-color: #f59e0b;
+  }
+  
+  .formActions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e2e8f0;
+  }
+  
+  .saveProfileButton {
+    background: #f59e0b;
+    color: white;
+    padding: 0.875rem 2rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+  }
+  
+  .saveProfileButton:hover {
+    background: #d97706;
+  }
+  
+  .cancelButton {
+    background: transparent;
+    color: #6b7280;
+    padding: 0.875rem 2rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+  }
+  
+  .cancelButton:hover {
+    border-color: #d1d5db;
+    color: #374151;
+  }
+  
+  /* Profile View */
+  .profileView {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .profileSection {
+    margin-bottom: 2.5rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  
+  .profileSection:last-child {
+    border-bottom: none;
+  }
+  
+  .profileSection h3 {
+    color: #404040;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .profileSection p {
+    color: #6b7280;
+    line-height: 1.6;
+    margin: 0;
+  }
+  
+  .verseQuote {
+    background: #fff7ed;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border-left: 4px solid #f59e0b;
+    font-style: italic;
+    margin: 0;
+    color: #92400e;
+  }
+  
+  .verseQuote cite {
+    display: block;
+    margin-top: 1rem;
+    font-style: normal;
+    font-weight: 600;
+    color: #b45309;
+  }
+  
+  /* Prayer Requests */
+  .prayerForm {
+    background: #f0fdf4;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid #dcfce7;
+    margin-bottom: 2rem;
+  }
+  
+  .prayerOptions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  
+  .addPrayerButton {
+    background: #10b981;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+  }
+  
+  .addPrayerButton:hover {
+    background: #059669;
+  }
+  
+  .prayerRequests {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .prayerRequest {
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    transition: all 0.3s ease;
+  }
+  
+  .prayerRequest:hover {
+    border-color: #d1d5db;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+  
+  .prayerRequest.answered {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+  }
+  
+  .prayerContent {
+    flex: 1;
+  }
+  
+  .prayerContent p {
+    margin: 0 0 1rem 0;
+    color: #374151;
+  }
+  
+  .prayerMeta {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+  
+  .prayerDate {
+    color: #9ca3af;
+    font-size: 0.875rem;
+  }
+  
+  .privateTag {
+    background: #fef3c7;
+    color: #92400e;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+  
+  .answeredTag {
+    background: #dcfce7;
+    color: #166534;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+  
+  .markAnsweredButton {
+    background: #10b981;
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+    white-space: nowrap;
+  }
+  
+  .markAnsweredButton:hover {
+    background: #059669;
+  }
+  
+  .noPrayers {
+    text-align: center;
+    color: #9ca3af;
+    font-style: italic;
+    padding: 2rem;
+    background: #f9fafb;
+    border-radius: 8px;
+    margin: 0;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .memberProfilePage {
+      padding: 0 1rem;
+    }
+  
+    .profileContainer {
+      margin: 1rem auto;
+    }
+  
+    .profileHeader {
+      grid-template-columns: 1fr;
+      text-align: center;
+      gap: 1.5rem;
+    }
+  
+    .profilePictureWrapper {
+      width: 100px;
+      height: 100px;
+    }
+  
+    .profileInfo h1 {
+      font-size: 1.75rem;
+    }
+  
+    .formRow {
+      grid-template-columns: 1fr;
+    }
+  
+    .prayerOptions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  
+    .prayerRequest {
+      flex-direction: column;
+    }
+  
+    .markAnsweredButton {
+      align-self: flex-start;
+    }
+  
+    .formActions {
+      flex-direction: column;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .profileContent {
+      padding: 1rem;
+    }
+  
+    .formSection {
+      padding: 1rem;
+    }
+  
+    .profileHeader {
+      padding: 1.5rem;
+    }
+  
+    .profileInfo h1 {
+      font-size: 1.5rem;
+    }
+  }

@@ -1,0 +1,174 @@
+/* src/styles/Home.module.css */
+
+.homePage {
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  /* Hero Section */
+  .heroSection {
+    background: white;
+    padding: 100px 0;
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+  }
+  
+  .heroTitle {
+    font-size: 3.5rem;
+    font-weight: bold;
+    color: #404040;
+    margin-bottom: 1.5rem;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  .heroSubtitle {
+    font-size: 1.3rem;
+    color: #6b7280;
+    margin-bottom: 2.5rem;
+    line-height: 1.6;
+  }
+  
+  .heroButtons .btn {
+    padding: 12px 30px;
+    font-size: 1.1rem;
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .heroButtons :global(.btn-primary) {
+    background-color: #f59e0b !important;
+    border-color: #f59e0b !important;
+  }
+  
+  .heroButtons :global(.btn-primary:hover) {
+    background-color: #d97706 !important;
+    border-color: #d97706 !important;
+  }
+  
+  .heroButtons .btn-primary {
+    background-color: #f59e0b;
+    border-color: #f59e0b;
+  }
+  
+  .heroButtons .btn-primary:hover {
+    background-color: #d97706;
+    border-color: #d97706;
+  }
+  
+  /* Features Section */
+  .featuresSection {
+    background-color: #ffffff;
+  }
+  
+  .featuresSection h2 {
+    color: #404040;
+    font-size: 2.5rem;
+    margin-top: 20px;
+    margin-bottom: 1rem;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  .featureCard {
+    background: #f8fafc;
+    padding: 2.5rem 2rem;
+    border-radius: 15px;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .featureCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+  
+  .featureIcon {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .featureCard h4 {
+    color: #404040;
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+    font-weight: bold;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  .featureCard p {
+    color: #6b7280;
+    line-height: 1.6;
+  }
+  
+  /* Call to Action Section */
+  .ctaSection {
+    background-color: #404040;
+    color: white;
+    padding: 80px 0;
+    text-align: center;
+  }
+  
+  .ctaSection h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  .ctaSection p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+  }
+  
+  .ctaSection .btn-light {
+    padding: 12px 40px;
+    font-size: 1.1rem;
+    color: #404040;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  .ctaSection .btn-light:hover {
+    background-color: #f59e0b;
+    color: white;
+    border-color: #f59e0b;
+  }
+  
+  /* Footer */
+  .footer {
+    background-color: #1f2937;
+    color: #9ca3af;
+    padding: 40px 0;
+  }
+  
+  .footer p {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .heroTitle {
+      font-size: 2.5rem;
+    }
+    
+    .heroSubtitle {
+      font-size: 1rem;
+    }
+    
+    .heroButtons .btn {
+      display: block;
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+    
+    .featuresSection h2 {
+      font-size: 2rem;
+      margin-top: 20px;
+    }
+    
+    .featureCard {
+      margin-bottom: 2rem;
+    }
+  }

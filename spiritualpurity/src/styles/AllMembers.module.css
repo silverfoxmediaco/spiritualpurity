@@ -1,0 +1,633 @@
+/* src/styles/AllMembers.module.css */
+
+.allMembersPage {
+    font-family: 'Poppins', sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  }
+  
+  /* Loading and Error States */
+  .loadingContainer,
+  .errorContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    text-align: center;
+    color: #6b7280;
+  }
+  
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #e2e8f0;
+    border-top: 4px solid #f59e0b;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 24px;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .retryButton {
+    background: #f59e0b;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    margin-top: 16px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .retryButton:hover {
+    background: #d97706;
+  }
+  
+  /* Page Header */
+  .pageHeader {
+    background: linear-gradient(135deg, #404040 0%, #525252 100%);
+    color: white;
+    padding: 80px 0;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .pageHeader::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="cross" width="30" height="30" patternUnits="userSpaceOnUse"><path d="M15 0v30M0 15h30" stroke="%23f59e0b" stroke-width="0.5" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23cross)"/></svg>');
+    pointer-events: none;
+  }
+  
+  .headerContent {
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .headerContent h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .headerContent p {
+    font-size: 1.25rem;
+    opacity: 0.9;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+  
+  /* Stats Section (moved after members) */
+  .statsSection {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    padding: 80px 0;
+    position: relative;
+    margin-top: 60px;
+  }
+  
+  .statsSection::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="cross" width="30" height="30" patternUnits="userSpaceOnUse"><path d="M15 0v30M0 15h30" stroke="%23f59e0b" stroke-width="0.5" opacity="0.05"/></pattern></defs><rect width="100" height="100" fill="url(%23cross)"/></svg>');
+    pointer-events: none;
+  }
+  
+  .statsContent {
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .statsContent h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #404040;
+    margin-bottom: 16px;
+  }
+  
+  .statsContent p {
+    font-size: 1.2rem;
+    color: #6b7280;
+    max-width: 600px;
+    margin: 0 auto 40px auto;
+    line-height: 1.6;
+  }
+  
+  .communityStats {
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    margin-top: 40px;
+  }
+  
+  .statItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .statNumber {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #f59e0b;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .statLabel {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+  }
+  
+  /* Filters Section */
+  .filtersSection {
+    background: white;
+    padding: 30px 0;
+    border-bottom: 1px solid #e2e8f0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  }
+  
+  .filtersContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .searchBar {
+    position: relative;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  
+  .searchBar .material-icons {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    font-size: 20px;
+  }
+  
+  .searchBar input {
+    width: 100%;
+    padding: 16px 16px 16px 50px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  .searchBar input:focus {
+    outline: none;
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+  }
+  
+  .filterControls {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  
+  .filterSelect,
+  .sortSelect {
+    padding: 12px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    background: white;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+  }
+  
+  .filterSelect:focus,
+  .sortSelect:focus {
+    outline: none;
+    border-color: #f59e0b;
+  }
+  
+  .clearButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: #f3f4f6;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    color: #6b7280;
+    transition: all 0.3s ease;
+  }
+  
+  .clearButton:hover {
+    background: #e5e7eb;
+    color: #374151;
+  }
+  
+  .clearButton .material-icons {
+    font-size: 18px;
+  }
+  
+  .resultsInfo {
+    text-align: center;
+    color: #6b7280;
+    font-weight: 500;
+    margin-top: 10px;
+  }
+  
+  /* Members Section */
+  .membersSection {
+    padding: 60px 0;
+  }
+  
+  .noResults {
+    text-align: center;
+    padding: 80px 20px;
+    color: #6b7280;
+  }
+  
+  .noResults .material-icons {
+    font-size: 4rem;
+    color: #d1d5db;
+    margin-bottom: 20px;
+  }
+  
+  .noResults h3 {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+    color: #374151;
+  }
+  
+  .membersGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 30px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  
+  .memberCard {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .memberCard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #f59e0b, #d97706);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+  
+  .memberCard:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+    border-color: #f59e0b;
+  }
+  
+  .memberCard:hover::before {
+    transform: scaleX(1);
+  }
+  
+  .memberHeader {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  
+  .memberImageWrapper {
+    position: relative;
+  }
+  
+  .memberImage {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #f59e0b;
+    transition: transform 0.3s ease;
+  }
+  
+  .memberCard:hover .memberImage {
+    transform: scale(1.05);
+  }
+  
+  .defaultAvatar {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid #f59e0b;
+    transition: transform 0.3s ease;
+  }
+  
+  .memberCard:hover .defaultAvatar {
+    transform: scale(1.05);
+  }
+  
+  .defaultAvatar .material-icons {
+    font-size: 28px;
+    color: white;
+  }
+  
+  .newMemberBadge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #10b981;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  }
+  
+  .newMemberBadge .material-icons {
+    font-size: 12px;
+    color: white;
+  }
+  
+  .memberBasicInfo {
+    flex: 1;
+  }
+  
+  .memberName {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #404040;
+    margin-bottom: 4px;
+  }
+  
+  .memberLocation {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #6b7280;
+    font-size: 0.9rem;
+  }
+  
+  .memberLocation .material-icons {
+    font-size: 16px;
+  }
+  
+  .memberDetails {
+    margin-bottom: 20px;
+  }
+  
+  .memberBio {
+    color: #374151;
+    line-height: 1.5;
+    margin-bottom: 16px;
+    font-style: italic;
+  }
+  
+  .memberMeta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .joinInfo,
+  .relationshipInfo {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: #6b7280;
+  }
+  
+  .joinInfo .material-icons,
+  .relationshipInfo .material-icons {
+    font-size: 16px;
+  }
+  
+  .relationshipInfo {
+    color: #f59e0b;
+    font-weight: 500;
+  }
+  
+  .memberActions {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .viewProfileButton,
+  .connectButton {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .viewProfileButton {
+    background: #f59e0b;
+    color: white;
+  }
+  
+  .viewProfileButton:hover {
+    background: #d97706;
+    transform: translateY(-1px);
+  }
+  
+  .connectButton {
+    background: #f3f4f6;
+    color: #6b7280;
+    border: 1px solid #e5e7eb;
+  }
+  
+  .connectButton:hover {
+    background: #e5e7eb;
+    color: #374151;
+  }
+  
+  .viewProfileButton .material-icons,
+  .connectButton .material-icons {
+    font-size: 16px;
+  }
+  
+  /* CTA Section */
+  .ctaSection {
+    background: linear-gradient(135deg, #404040 0%, #525252 100%);
+    color: white;
+    padding: 80px 0;
+    margin-top: 60px;
+  }
+  
+  .ctaContent {
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .ctaContent h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+  
+  .ctaContent p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    margin-bottom: 32px;
+    line-height: 1.6;
+  }
+  
+  .joinButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: #f59e0b;
+    color: white;
+    padding: 16px 32px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  .joinButton:hover {
+    background: #d97706;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
+  }
+  
+  .joinButton .material-icons {
+    font-size: 20px;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .headerContent h1 {
+      font-size: 2.5rem;
+    }
+  
+    .headerContent p {
+      font-size: 1.1rem;
+      padding: 0 20px;
+    }
+  
+    .communityStats {
+      gap: 40px;
+    }
+  
+    .statNumber {
+      font-size: 2rem;
+    }
+  
+    .filtersContainer {
+      padding: 0 20px;
+    }
+  
+    .filterControls {
+      flex-direction: column;
+      gap: 12px;
+    }
+  
+    .filterSelect,
+    .sortSelect,
+    .clearButton {
+      width: 100%;
+      max-width: 300px;
+    }
+  
+    .membersGrid {
+      grid-template-columns: 1fr;
+      gap: 20px;
+      padding: 0 20px;
+    }
+  
+    .memberCard {
+      padding: 20px;
+    }
+  
+    .memberHeader {
+      flex-direction: column;
+      text-align: center;
+      gap: 12px;
+    }
+  
+    .memberActions {
+      flex-direction: column;
+    }
+  
+    .ctaContent h2 {
+      font-size: 2rem;
+    }
+  
+    .ctaContent p {
+      font-size: 1rem;
+      padding: 0 20px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .communityStats {
+      flex-direction: column;
+      gap: 20px;
+    }
+  
+    .memberCard {
+      padding: 16px;
+    }
+  
+    .searchBar {
+      padding: 0 20px;
+    }
+  }

@@ -1,0 +1,492 @@
+/* src/styles/FeaturedMembers.module.css */
+
+.featuredSection {
+    padding: 80px 0;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    position: relative;
+  }
+  
+  .featuredSection::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="cross" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M10 0v20M0 10h20" stroke="%23f59e0b" stroke-width="0.5" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23cross)"/></svg>');
+    pointer-events: none;
+  }
+  
+  .sectionHeader {
+    text-align: center;
+    margin-bottom: 60px;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .sectionHeader h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #404040;
+    margin-bottom: 16px;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  .sectionHeader p {
+    font-size: 1.2rem;
+    color: #6b7280;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+  
+  .membersGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .memberCard {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid transparent;
+  }
+  
+  .memberCard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #f59e0b, #d97706);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+  
+  .memberCard:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+    border-color: #f59e0b;
+  }
+  
+  .memberCard:hover::before {
+    transform: scaleX(1);
+  }
+  
+  .memberCard:focus {
+    outline: none;
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+  }
+  
+  .memberImageWrapper {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  
+  .memberImage {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #f59e0b;
+    transition: transform 0.3s ease;
+  }
+  
+  .memberCard:hover .memberImage {
+    transform: scale(1.1);
+  }
+
+  /* View Profile Button */
+.viewProfileButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 8px;
+  }
+  
+  .viewProfileButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(245, 158, 11, 0.3);
+  }
+  
+  .viewProfileButton .material-icons {
+    font-size: 16px;
+    transition: transform 0.3s ease;
+  }
+  
+  .memberCard:hover .viewProfileButton .material-icons {
+    transform: translateX(2px);
+  }
+  
+  .defaultAvatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 4px solid #f59e0b;
+    transition: transform 0.3s ease;
+  }
+  
+  .memberCard:hover .defaultAvatar {
+    transform: scale(1.1);
+  }
+  
+  .defaultAvatar .material-icons {
+    font-size: 36px;
+    color: white;
+  }
+  
+  /* Personalization Badge (Golden Star) */
+  .memberBadge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 2;
+  }
+  
+  .memberBadge .material-icons {
+    font-size: 14px;
+    color: white;
+  }
+  
+  /* New Member Badge (Green) */
+  .newMemberBadge {
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    background: #10b981;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 2;
+  }
+  
+  .newMemberBadge .material-icons {
+    font-size: 14px;
+    color: white;
+  }
+  
+  .memberInfo {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .memberName {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #404040;
+    margin-bottom: 8px;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  .memberLocation {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    color: #6b7280;
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+  }
+  
+  .memberLocation .material-icons {
+    font-size: 16px;
+  }
+  
+  .memberBio {
+    color: #374151;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 16px;
+    font-style: italic;
+  }
+  
+  .memberMeta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+  }
+  
+  .joinDate {
+    color: #9ca3af;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+  
+  .relationshipStatus {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #f59e0b;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+  
+  .relationshipStatus .material-icons {
+    font-size: 14px;
+  }
+  
+  /* Shared Interests Display */
+  .sharedInterests {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: #f59e0b;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-top: 8px;
+    padding: 4px 8px;
+    background: rgba(245, 158, 11, 0.1);
+    border-radius: 12px;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+  }
+  
+  .sharedInterests .material-icons {
+    font-size: 14px;
+  }
+  
+  .viewProfilePrompt {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #f59e0b;
+    font-weight: 600;
+    font-size: 0.9rem;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+  }
+  
+  .memberCard:hover .viewProfilePrompt {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  .viewProfilePrompt .material-icons {
+    font-size: 18px;
+    transition: transform 0.3s ease;
+  }
+  
+  .memberCard:hover .viewProfilePrompt .material-icons {
+    transform: translateX(4px);
+  }
+  
+  .sectionFooter {
+    text-align: center;
+    margin-top: 50px;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .viewAllButton {
+    background: linear-gradient(135deg, #404040, #525252);
+    color: white;
+    padding: 16px 32px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+    font-family: 'Poppins', sans-serif;
+    text-decoration: none;
+  }
+  
+  .viewAllButton:hover {
+    background: linear-gradient(135deg, #525252, #404040);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(64, 64, 64, 0.3);
+    color: white;
+    text-decoration: none;
+  }
+  
+  .viewAllButton .material-icons {
+    font-size: 20px;
+  }
+  
+  /* Personalization Note */
+  .personalizationNote {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+    padding: 12px 20px;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-radius: 25px;
+    color: #d97706;
+    font-size: 0.9rem;
+    font-weight: 500;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .personalizationNote .material-icons {
+    font-size: 18px;
+    color: #f59e0b;
+  }
+  
+  /* Loading State */
+  .loadingState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 0;
+    color: #6b7280;
+  }
+  
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e2e8f0;
+    border-top: 4px solid #f59e0b;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .loadingState h3 {
+    color: #404040;
+    margin-bottom: 8px;
+    font-size: 1.2rem;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  .loadingState p {
+    color: #6b7280;
+    font-size: 0.95rem;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .featuredSection {
+      padding: 60px 0;
+    }
+  
+    .sectionHeader h2 {
+      font-size: 2rem;
+    }
+  
+    .sectionHeader p {
+      font-size: 1rem;
+      padding: 0 20px;
+    }
+  
+    .membersGrid {
+      grid-template-columns: 1fr;
+      gap: 20px;
+      padding: 0 20px;
+    }
+  
+    .memberCard {
+      padding: 24px;
+    }
+  
+    .viewAllButton {
+      padding: 14px 24px;
+      font-size: 1rem;
+    }
+  
+    .personalizationNote {
+      font-size: 0.85rem;
+      padding: 10px 16px;
+      margin-top: 15px;
+    }
+    
+    .sharedInterests {
+      font-size: 0.8rem;
+    }
+    
+    .memberBadge,
+    .newMemberBadge {
+      width: 24px;
+      height: 24px;
+    }
+    
+    .memberBadge .material-icons,
+    .newMemberBadge .material-icons {
+      font-size: 12px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .memberCard {
+      padding: 20px;
+    }
+  
+    .memberName {
+      font-size: 1.2rem;
+    }
+  
+    .sectionHeader {
+      margin-bottom: 40px;
+    }
+    
+    .memberImage,
+    .defaultAvatar {
+      width: 70px;
+      height: 70px;
+    }
+    
+    .defaultAvatar .material-icons {
+      font-size: 30px;
+    }
+  }
