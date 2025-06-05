@@ -1,12 +1,55 @@
 // spiritualpurity-backend/routes/users.js
 
 const express = require('express');
-const User = require('../models/User'); // Fixed: Added .. to go up one directory
+const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
-const path = require('path');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('cloudinary').v2;
 
 const router = express.Router();
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+// Configure Cloudinary storage for multer
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'spiritualpurity/profile-pictures',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+    transformation: [
+      {
+        width: 400,
+        height: 400,
+        crop: 'fill',
+        gravity: 'face'
+      }
+    ],
+    public_id: (req, file) => {
+      return `profile-${req.user._id}-${Date.now()}`;
+    }
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  },
+  fileFilter: function (req, file, cb) {
+    // Accept only image files
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed!'), false);
+    }
+  }
+});
 
 // Middleware to verify JWT token
 const authenticateToken = async (req, res, next) => {
@@ -41,32 +84,6 @@ const authenticateToken = async (req, res, next) => {
     });
   }
 };
-
-// Configure multer for profile picture uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/profile-pictures/');
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, 'profile-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
-const upload = multer({
-  storage: storage,
-  limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
-  },
-  fileFilter: function (req, file, cb) {
-    // Accept only image files
-    if (file.mimetype.startsWith('image/')) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only image files are allowed!'), false);
-    }
-  }
-});
 
 // Helper function to calculate compatibility score between two users
 function calculateCompatibilityScore(currentUser, otherUser) {
@@ -498,7 +515,7 @@ router.put('/interests', authenticateToken, async (req, res) => {
 });
 
 // @route   POST /api/users/upload-avatar
-// @desc    Upload profile picture
+// @desc    Upload profile picture to Cloudinary
 // @access  Private
 router.post('/upload-avatar', authenticateToken, upload.single('avatar'), async (req, res) => {
   try {
@@ -518,16 +535,31 @@ router.post('/upload-avatar', authenticateToken, upload.single('avatar'), async 
       });
     }
 
-    // Update user's profile picture path
-    const profilePicturePath = `/uploads/profile-pictures/${req.file.filename}`;
-    user.profilePicture = profilePicturePath;
+    // Delete old profile picture from Cloudinary if it exists
+    if (user.profilePicture) {
+      try {
+        // Extract public_id from the old URL
+        const urlParts = user.profilePicture.split('/');
+        const publicIdWithExtension = urlParts[urlParts.length - 1];
+        const publicId = `spiritualpurity/profile-pictures/${publicIdWithExtension.split('.')[0]}`;
+        
+        await cloudinary.uploader.destroy(publicId);
+        console.log('Old profile picture deleted from Cloudinary');
+      } catch (deleteError) {
+        console.log('Could not delete old profile picture:', deleteError.message);
+        // Continue with the upload even if deletion fails
+      }
+    }
+
+    // Update user's profile picture with Cloudinary URL
+    user.profilePicture = req.file.path; // Cloudinary URL
     await user.save();
 
     res.json({
       success: true,
       message: 'Profile picture uploaded successfully',
       data: {
-        profilePicture: profilePicturePath,
+        profilePicture: user.profilePicture,
         user: user.getPublicProfile()
       }
     });
