@@ -1,6 +1,7 @@
 // src/components/auth/RegistrationModal.jsx
 
 import React, { useState } from 'react';
+import API_CONFIG from '../../config/api'; // Import the API config
 import styles from '../../styles/RegistrationModal.module.css';
 
 const RegistrationModal = ({ isOpen, onClose }) => {
@@ -73,7 +74,8 @@ const RegistrationModal = ({ isOpen, onClose }) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5001/api/auth/register', {
+      // FIXED: Use API_CONFIG instead of hardcoded localhost
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -112,6 +114,9 @@ const RegistrationModal = ({ isOpen, onClose }) => {
           bio: '',
           location: { city: '', state: '', country: 'United States' }
         });
+        
+        // Reload page to update all components
+        window.location.reload();
       } else {
         setErrors({ general: data.message || 'Registration failed. Please try again.' });
       }

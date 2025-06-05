@@ -1,45 +1,43 @@
 // src/components/auth/LoginModal.jsx
 
 import React, { useState } from 'react';
+import API_CONFIG from '../../config/api'; // Import the API config
 import styles from '../../styles/LoginModal.module.css';
 
 const LoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
   const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    firstName: '',
-    lastName: '',
-    confirmPassword: ''
-  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  
+  // Login form state
+  const [loginData, setLoginData] = useState({
+    email: '',
+    password: ''
+  });
+  
+  // Registration form state
+  const [registerData, setRegisterData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: ''
+  });
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    // Clear error when user starts typing
-    if (error) setError('');
-  };
+  if (!isOpen) return null;
 
-  const handleLogin = async (e) => {
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
-      const response = await fetch('http://localhost:5001/api/auth/login', {
+      // Use API_CONFIG instead of hardcoded localhost
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password
-        })
+        body: JSON.stringify(loginData),
       });
 
       const data = await response.json();
@@ -51,14 +49,10 @@ const LoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
         
         // Call success callback
         onLoginSuccess(data.data.user);
-        
-        // Close modal and reset form
         onClose();
-        resetForm();
         
-        // Optional: Show success message
-        alert(`Welcome back, ${data.data.user.firstName}!`);
-        
+        // Optionally reload page to update all components
+        window.location.reload();
       } else {
         setError(data.message || 'Login failed');
       }
@@ -70,36 +64,19 @@ const LoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
     }
   };
 
-  const handleRegister = async (e) => {
+  const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    // Validation
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      setLoading(false);
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long');
-      setLoading(false);
-      return;
-    }
-
     try {
-      const response = await fetch('http://localhost:5001/api/auth/register', {
+      // Use API_CONFIG instead of hardcoded localhost
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/auth/register`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          password: formData.password
-        })
+        body: JSON.stringify(registerData),
       });
 
       const data = await response.json();
@@ -109,16 +86,17 @@ const LoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
         localStorage.setItem('token', data.data.token);
         localStorage.setItem('user', JSON.stringify(data.data.user));
         
+        // Switch to login mode and show success
+        setIsLogin(true);
+        setError('');
+        alert('Registration successful! You are now logged in.');
+        
         // Call success callback
         onLoginSuccess(data.data.user);
-        
-        // Close modal and reset form
         onClose();
-        resetForm();
         
-        // Show welcome message
-        alert(`Welcome to Spiritual Purity, ${data.data.user.firstName}!`);
-        
+        // Optionally reload page to update all components
+        window.location.reload();
       } else {
         setError(data.message || 'Registration failed');
       }
@@ -130,38 +108,35 @@ const LoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
     }
   };
 
-  const resetForm = () => {
-    setFormData({
-      email: '',
-      password: '',
-      firstName: '',
-      lastName: '',
-      confirmPassword: ''
-    });
-    setError('');
-    setIsLogin(true);
+  const handleInputChange = (e, formType) => {
+    const { name, value } = e.target;
+    
+    if (formType === 'login') {
+      setLoginData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    } else {
+      setRegisterData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const switchMode = () => {
     setIsLogin(!isLogin);
     setError('');
-    setFormData(prev => ({
-      ...prev,
-      password: '',
-      confirmPassword: '',
-      firstName: '',
-      lastName: ''
-    }));
+    setLoginData({ email: '', password: '' });
+    setRegisterData({ firstName: '', lastName: '', email: '', password: '' });
   };
-
-  if (!isOpen) return null;
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         <div className={styles.modalHeader}>
           <h2>{isLogin ? 'Welcome Back' : 'Join Our Community'}</h2>
-          <button className={styles.closeButton} onClick={onClose}>
+          <button onClick={onClose} className={styles.closeButton}>
             <span className="material-icons">close</span>
           </button>
         </div>
@@ -174,18 +149,64 @@ const LoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
             </div>
           )}
 
-          <form onSubmit={isLogin ? handleLogin : handleRegister}>
-            {!isLogin && (
+          {isLogin ? (
+            // Login Form
+            <form onSubmit={handleLoginSubmit}>
+              <div className={styles.formGroup}>
+                <label>Email Address</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={loginData.email}
+                  onChange={(e) => handleInputChange(e, 'login')}
+                  placeholder="Enter your email"
+                  required
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Password</label>
+                <input
+                  type="password"
+                  name="password"
+                  value={loginData.password}
+                  onChange={(e) => handleInputChange(e, 'login')}
+                  placeholder="Enter your password"
+                  required
+                />
+              </div>
+
+              <button 
+                type="submit" 
+                className={styles.submitButton}
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <div className={styles.spinner}></div>
+                    Signing In...
+                  </>
+                ) : (
+                  <>
+                    <span className="material-icons">login</span>
+                    Sign In
+                  </>
+                )}
+              </button>
+            </form>
+          ) : (
+            // Registration Form
+            <form onSubmit={handleRegisterSubmit}>
               <div className={styles.nameFields}>
                 <div className={styles.formGroup}>
                   <label>First Name</label>
                   <input
                     type="text"
                     name="firstName"
-                    value={formData.firstName}
-                    onChange={handleInputChange}
-                    required={!isLogin}
-                    placeholder="Enter your first name"
+                    value={registerData.firstName}
+                    onChange={(e) => handleInputChange(e, 'register')}
+                    placeholder="First name"
+                    required
                   />
                 </div>
                 <div className={styles.formGroup}>
@@ -193,94 +214,73 @@ const LoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
                   <input
                     type="text"
                     name="lastName"
-                    value={formData.lastName}
-                    onChange={handleInputChange}
-                    required={!isLogin}
-                    placeholder="Enter your last name"
+                    value={registerData.lastName}
+                    onChange={(e) => handleInputChange(e, 'register')}
+                    placeholder="Last name"
+                    required
                   />
                 </div>
               </div>
-            )}
 
-            <div className={styles.formGroup}>
-              <label>Email Address</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                required
-                placeholder="Enter your email address"
-              />
-            </div>
-
-            <div className={styles.formGroup}>
-              <label>Password</label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                required
-                placeholder="Enter your password"
-              />
-            </div>
-
-            {!isLogin && (
               <div className={styles.formGroup}>
-                <label>Confirm Password</label>
+                <label>Email Address</label>
                 <input
-                  type="password"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                  required={!isLogin}
-                  placeholder="Confirm your password"
+                  type="email"
+                  name="email"
+                  value={registerData.email}
+                  onChange={(e) => handleInputChange(e, 'register')}
+                  placeholder="Enter your email"
+                  required
                 />
               </div>
-            )}
 
-            <button 
-              type="submit" 
-              className={styles.submitButton}
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <div className={styles.spinner}></div>
-                  {isLogin ? 'Signing In...' : 'Creating Account...'}
-                </>
-              ) : (
-                <>
-                  <span className="material-icons">
-                    {isLogin ? 'login' : 'person_add'}
-                  </span>
-                  {isLogin ? 'Sign In' : 'Create Account'}
-                </>
-              )}
-            </button>
-          </form>
+              <div className={styles.formGroup}>
+                <label>Password</label>
+                <input
+                  type="password"
+                  name="password"
+                  value={registerData.password}
+                  onChange={(e) => handleInputChange(e, 'register')}
+                  placeholder="Create a password"
+                  required
+                  minLength="6"
+                />
+              </div>
+
+              <button 
+                type="submit" 
+                className={styles.submitButton}
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <div className={styles.spinner}></div>
+                    Creating Account...
+                  </>
+                ) : (
+                  <>
+                    <span className="material-icons">person_add</span>
+                    Join Us
+                  </>
+                )}
+              </button>
+            </form>
+          )}
 
           <div className={styles.switchMode}>
             <p>
               {isLogin ? "Don't have an account?" : "Already have an account?"}
-              <button 
-                type="button" 
-                className={styles.switchButton}
-                onClick={switchMode}
-              >
-                {isLogin ? 'Join Us' : 'Sign In'}
+              <button onClick={switchMode} className={styles.switchButton}>
+                {isLogin ? 'Sign Up' : 'Sign In'}
               </button>
             </p>
           </div>
 
-          {isLogin && (
-            <div className={styles.forgotPassword}>
-              <button type="button" className={styles.forgotButton}>
-                Forgot your password?
-              </button>
-            </div>
-          )}
+          <div className={styles.forgotPassword}>
+            <button className={styles.forgotButton}>
+              Forgot your password?
+            </button>
+          </div>
         </div>
 
         <div className={styles.modalFooter}>
