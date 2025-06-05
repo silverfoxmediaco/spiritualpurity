@@ -86,6 +86,19 @@ const FeaturedMembers = ({ limit = 4, showTitle = true, showViewAllButton = true
     });
   };
 
+  // Helper function to get the correct image URL
+  const getProfileImageUrl = (profilePicture) => {
+    if (!profilePicture) return null;
+    
+    // If it's already a full URL (starts with http), use it as is
+    if (profilePicture.startsWith('http')) {
+      return profilePicture;
+    }
+    
+    // If it's a relative path, prepend the API base URL
+    return `${API_CONFIG.BASE_URL}${profilePicture}`;
+  };
+
   if (loading) {
     return (
       <section className={styles.featuredSection}>
@@ -135,9 +148,13 @@ const FeaturedMembers = ({ limit = 4, showTitle = true, showViewAllButton = true
             <div key={member._id} className={styles.memberCard} onClick={() => handleMemberClick(member._id)}>
               <div className={styles.memberImageWrapper}>
                 <img 
-                  src={member.profilePicture ? `${API_CONFIG.BASE_URL}${member.profilePicture}` : 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><rect width="80" height="80" fill="%23f59e0b"/><path d="M40 20c-5.5 0-10 4.5-10 10s4.5 10 10 10 10-4.5 10-10-4.5-10-10-10zm0 30c-8.3 0-15 3.3-15 7.5V65h30v-7.5c0-4.2-6.7-7.5-15-7.5z" fill="white"/></svg>'} 
+                  src={getProfileImageUrl(member.profilePicture) || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><rect width="80" height="80" fill="%23f59e0b"/><path d="M40 20c-5.5 0-10 4.5-10 10s4.5 10 10 10 10-4.5 10-10-4.5-10-10-10zm0 30c-8.3 0-15 3.3-15 7.5V65h30v-7.5c0-4.2-6.7-7.5-15-7.5z" fill="white"/></svg>'} 
                   alt={`${member.firstName} ${member.lastName}`}
                   className={styles.memberImage}
+                  onError={(e) => {
+                    // Fallback to default avatar if image fails
+                    e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><rect width="80" height="80" fill="%23f59e0b"/><path d="M40 20c-5.5 0-10 4.5-10 10s4.5 10 10 10 10-4.5 10-10-4.5-10-10-10zm0 30c-8.3 0-15 3.3-15 7.5V65h30v-7.5c0-4.2-6.7-7.5-15-7.5z" fill="white"/></svg>';
+                  }}
                 />
                 
                 {/* Show personalization indicator */}

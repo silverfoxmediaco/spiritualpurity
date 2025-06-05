@@ -253,6 +253,19 @@ const MemberProfile = () => {
     }
   };
 
+  // Helper function to get the correct image URL
+  const getProfileImageUrl = (profilePicture) => {
+    if (!profilePicture) return null;
+    
+    // If it's already a full URL (starts with http), use it as is (Cloudinary URLs)
+    if (profilePicture.startsWith('http')) {
+      return profilePicture;
+    }
+    
+    // If it's a relative path, prepend the API base URL
+    return `${API_CONFIG.BASE_URL}${profilePicture}`;
+  };
+
   if (loading) {
     return (
       <div className={styles.memberProfilePage}>
@@ -296,7 +309,7 @@ const MemberProfile = () => {
                   <div className={styles.profilePictureWrapper}>
                     {user?.profilePicture ? (
                       <img 
-                        src={`${API_CONFIG.BASE_URL}${user.profilePicture}`} 
+                        src={getProfileImageUrl(user.profilePicture)} 
                         alt="Profile" 
                         className={styles.profilePicture}
                         onError={(e) => {

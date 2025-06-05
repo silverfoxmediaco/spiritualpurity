@@ -103,6 +103,19 @@ const AllMembers = () => {
     setSortBy('newest');
   };
 
+  // Helper function to get the correct image URL
+  const getProfileImageUrl = (profilePicture) => {
+    if (!profilePicture) return null;
+    
+    // If it's already a full URL (starts with http), use it as is (Cloudinary URLs)
+    if (profilePicture.startsWith('http')) {
+      return profilePicture;
+    }
+    
+    // If it's a relative path, prepend the API base URL
+    return `${API_CONFIG.BASE_URL}${profilePicture}`;
+  };
+
   if (loading) {
     return (
       <div className={styles.allMembersPage}>
@@ -236,15 +249,18 @@ const AllMembers = () => {
                     <div className={styles.memberImageWrapper}>
                       {member.profilePicture ? (
                         <img 
-                          src={`${API_CONFIG.BASE_URL}${member.profilePicture}`}
+                          src={getProfileImageUrl(member.profilePicture)}
                           alt={`${member.firstName} ${member.lastName}`}
                           className={styles.memberImage}
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'flex';
+                          }}
                         />
-                      ) : (
-                        <div className={styles.defaultAvatar}>
-                          <span className="material-icons">person</span>
-                        </div>
-                      )}
+                      ) : null}
+                      <div className={styles.defaultAvatar} style={member.profilePicture ? {display: 'none'} : {}}>
+                        <span className="material-icons">person</span>
+                      </div>
                       
                       {/* New member indicator */}
                       {new Date() - new Date(member.joinDate) < 30 * 24 * 60 * 60 * 1000 && (

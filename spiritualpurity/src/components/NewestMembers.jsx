@@ -56,6 +56,19 @@ const NewestMembers = () => {
     });
   };
 
+  // Helper function to get the correct image URL
+  const getProfileImageUrl = (profilePicture) => {
+    if (!profilePicture) return null;
+    
+    // If it's already a full URL (starts with http), use it as is
+    if (profilePicture.startsWith('http')) {
+      return profilePicture;
+    }
+    
+    // If it's a relative path, prepend the API base URL
+    return `${API_CONFIG.BASE_URL}${profilePicture}`;
+  };
+
   if (loading) {
     return (
       <section className={styles.newestMembersSection}>
@@ -89,7 +102,7 @@ const NewestMembers = () => {
                   <div className={styles.memberImageWrapper}>
                     {member.profilePicture ? (
                       <img 
-                        src={`${API_CONFIG.BASE_URL}${member.profilePicture}`}
+                        src={getProfileImageUrl(member.profilePicture)}
                         alt={`${member.firstName} ${member.lastName}`}
                         className={styles.memberImage}
                         onError={(e) => {

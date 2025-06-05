@@ -140,6 +140,19 @@ const ProfileMessages = ({ currentUser }) => {
     return conversations.reduce((total, conv) => total + (conv.unreadCount || 0), 0);
   };
 
+  // Helper function to get the correct image URL
+  const getProfileImageUrl = (profilePicture) => {
+    if (!profilePicture) return null;
+    
+    // If it's already a full URL (starts with http), use it as is (Cloudinary URLs)
+    if (profilePicture.startsWith('http')) {
+      return profilePicture;
+    }
+    
+    // If it's a relative path, prepend the API base URL
+    return `${API_CONFIG.BASE_URL}${profilePicture}`;
+  };
+
   if (loading) {
     return (
       <div className={styles.profileSection}>
@@ -203,7 +216,7 @@ const ProfileMessages = ({ currentUser }) => {
                     <div className={styles.participantAvatar}>
                       {conversation.participant.profilePicture ? (
                         <img 
-                          src={`${API_CONFIG.BASE_URL}${conversation.participant.profilePicture}`}
+                          src={getProfileImageUrl(conversation.participant.profilePicture)}
                           alt={conversation.participant.name}
                         />
                       ) : (
@@ -240,7 +253,7 @@ const ProfileMessages = ({ currentUser }) => {
                       <div className={styles.participantAvatar}>
                         {selectedConversation.participant.profilePicture ? (
                           <img 
-                            src={`${API_CONFIG.BASE_URL}${selectedConversation.participant.profilePicture}`}
+                            src={getProfileImageUrl(selectedConversation.participant.profilePicture)}
                             alt={selectedConversation.participant.name}
                           />
                         ) : (
@@ -330,7 +343,7 @@ const ProfileMessages = ({ currentUser }) => {
                 <div className={styles.participantAvatar}>
                   {conversation.participant.profilePicture ? (
                     <img 
-                      src={`${API_CONFIG.BASE_URL}${conversation.participant.profilePicture}`}
+                      src={getProfileImageUrl(conversation.participant.profilePicture)}
                       alt={conversation.participant.name}
                     />
                   ) : (
