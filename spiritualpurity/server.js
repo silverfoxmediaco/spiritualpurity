@@ -1,4 +1,4 @@
-// spiritualpurity-backend/server.js
+// spiritualpurity/server.js
 
 const express = require('express');
 const mongoose = require('mongoose');
@@ -26,13 +26,16 @@ uploadDirs.forEach(dir => {
   }
 });
 
-// Middleware
+// CORS Configuration - Fixed for production
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://spiritualpurity.onrender.com'] 
+    : ['http://localhost:3000', 'http://127.0.0.1:3000'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -43,8 +46,6 @@ app.use('/uploads', express.static('uploads'));
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('Connected to MongoDB Atlas');
-    
-    // Create indexes for better performance
     createDatabaseIndexes();
   })
   .catch((error) => console.error('MongoDB connection error:', error));
@@ -70,34 +71,13 @@ async function createDatabaseIndexes() {
     await db.collection('advertisements').createIndex({ status: 1 });
     await db.collection('advertisements').createIndex({ tier: 1 });
     await db.collection('advertisements').createIndex({ category: 1 });
-    await db.collection('advertisements').createIndex({ 
-      'targeting.schedule.startDate': 1, 
-      'targeting.schedule.endDate': 1 
-    });
-    
-    // Ad interaction indexes
-    await db.collection('adinteractions').createIndex({ 
-      advertisement: 1, 
-      createdAt: -1 
-    });
-    await db.collection('adinteractions').createIndex({ 
-      advertiser: 1, 
-      createdAt: -1 
-    });
-    await db.collection('adinteractions').createIndex({ 
-      interactionType: 1, 
-      createdAt: -1 
-    });
     
     // Conversation indexes
     await db.collection('conversations').createIndex({ participants: 1 });
     await db.collection('conversations').createIndex({ lastActivity: -1 });
     
     // Message indexes
-    await db.collection('messages').createIndex({ 
-      conversation: 1, 
-      createdAt: -1 
-    });
+    await db.collection('messages').createIndex({ conversation: 1, createdAt: -1 });
     await db.collection('messages').createIndex({ sender: 1 });
     
     console.log('Database indexes created successfully');
@@ -106,30 +86,17 @@ async function createDatabaseIndexes() {
   }
 }
 
-// Routes
-app.get('/', (req, res) => {
-  res.json({ 
-    message: 'Spiritual Purity API Server is running!',
-    version: '1.0.0',
-    endpoints: {
-      auth: '/api/auth',
-      users: '/api/users', 
-      messages: '/api/messages',
-      advertisers: '/api/advertisers'
-    }
-  });
-});
-
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ 
     status: 'healthy',
     timestamp: new Date().toISOString(),
-    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+    environment: process.env.NODE_ENV
   });
 });
 
-// Import and use routes
+// API Routes
 try {
   app.use('/api/auth', require('./routes/auth'));
   app.use('/api/users', require('./routes/users'));
@@ -138,6 +105,32 @@ try {
   console.log('All routes loaded successfully');
 } catch (error) {
   console.error('Error loading routes:', error);
+  console.log('Some API routes may not be available');
+}
+
+// Serve static files from React build (PRODUCTION)
+if (process.env.NODE_ENV === 'production') {
+  // Serve static files from React build
+  app.use(express.static(path.join(__dirname, 'build')));
+
+  // Handle React routing - catch all handler for non-API routes
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'build', 'index.html'));
+  });
+} else {
+  // Development route
+  app.get('/', (req, res) => {
+    res.json({ 
+      message: 'Spiritual Purity API Server is running!',
+      version: '1.0.0',
+      endpoints: {
+        auth: '/api/auth',
+        users: '/api/users', 
+        messages: '/api/messages',
+        advertisers: '/api/advertisers'
+      }
+    });
+  });
 }
 
 // Error handling middleware
@@ -174,19 +167,14 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Handle 404 routes
-app.use('*', (req, res) => {
-  res.status(404).json({
-    success: false,
-    message: `Route ${req.originalUrl} not found`
-  });
-});
+// CRITICAL: Render requires binding to all interfaces and using PORT env var
+const PORT = process.env.PORT || 10000;
 
-const PORT = process.env.PORT || 5001;
-
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is running on port ${PORT}`);
-  console.log(`Visit: http://localhost:${PORT}`);
-  console.log(`Health check: http://localhost:${PORT}/health`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`Health check: http://localhost:${PORT}/health`);
+  if (process.env.NODE_ENV === 'production') {
+    console.log('Serving React app from /build directory');
+  }
 });
