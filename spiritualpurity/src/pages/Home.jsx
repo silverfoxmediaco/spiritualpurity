@@ -38,6 +38,7 @@ const Home = () => {
                 >
                   Join Today
                 </button>
+                <p>It's Free and always will be.</p>
               </div>
             </div>
           </div>
