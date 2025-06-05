@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
+import Footer from '../components/Footer';
 import ProfileMessages from '../components/ProfileMessages';
 import API_CONFIG from '../config/api';
 import styles from '../styles/MemberProfile.module.css';
@@ -260,6 +261,7 @@ const MemberProfile = () => {
           <div className={styles.spinner}></div>
           <p>Loading your profile...</p>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -274,6 +276,7 @@ const MemberProfile = () => {
             Go Back Home
           </button>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -296,12 +299,18 @@ const MemberProfile = () => {
                         src={`${API_CONFIG.BASE_URL}${user.profilePicture}`} 
                         alt="Profile" 
                         className={styles.profilePicture}
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
                       />
-                    ) : (
-                      <div className={styles.defaultAvatar}>
-                        <span className="material-icons">person</span>
-                      </div>
-                    )}
+                    ) : null}
+                    <div 
+                      className={styles.defaultAvatar}
+                      style={user?.profilePicture ? {display: 'none'} : {display: 'flex'}}
+                    >
+                      <span className="material-icons">person</span>
+                    </div>
                   </div>
                   
                   <div className={styles.uploadSection}>
@@ -663,6 +672,8 @@ const MemberProfile = () => {
           </div>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 };
