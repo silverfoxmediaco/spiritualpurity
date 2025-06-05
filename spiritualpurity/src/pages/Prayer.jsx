@@ -13,7 +13,6 @@ const Prayer = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [isPrivate, setIsPrivate] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState('all'); // 'all', 'my-prayers', 'answered'
   const [user, setUser] = useState(null);
@@ -97,7 +96,7 @@ const Prayer = () => {
       
     } catch (error) {
       console.error('Error fetching prayer requests:', error);
-      setError('Failed to load prayer requests');
+      // Handle error appropriately - could show a user-friendly message
     } finally {
       setLoading(false);
     }
@@ -149,7 +148,7 @@ const Prayer = () => {
       
     } catch (error) {
       console.error('Error submitting prayer request:', error);
-      setError('Failed to submit prayer request');
+      alert('Failed to submit prayer request. Please try again.');
     } finally {
       setSubmitting(false);
     }

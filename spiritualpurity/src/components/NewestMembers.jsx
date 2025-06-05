@@ -85,14 +85,6 @@ const NewestMembers = () => {
                 <div
                   key={member._id}
                   className={styles.memberCard}
-                  onClick={() => handleMemberClick(member._id)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      handleMemberClick(member._id);
-                    }
-                  }}
                 >
                   <div className={styles.memberImageWrapper}>
                     {member.profilePicture ? (
@@ -150,10 +142,14 @@ const NewestMembers = () => {
                       )}
                     </div>
 
-                    <div className={styles.viewProfilePrompt}>
+                    {/* Always visible View Profile Button */}
+                    <button 
+                      className={styles.viewProfileButton}
+                      onClick={() => handleMemberClick(member._id)}
+                    >
                       <span>View Profile</span>
                       <span className="material-icons">arrow_forward</span>
-                    </div>
+                    </button>
                   </div>
                 </div>
               ))}

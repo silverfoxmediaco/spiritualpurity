@@ -56,10 +56,11 @@
     padding: 30px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease;
-    cursor: pointer;
     position: relative;
     overflow: hidden;
     border: 2px solid transparent;
+    display: flex;
+    flex-direction: column;
   }
   
   .memberCard::before {
@@ -153,7 +154,9 @@
   
   .memberInfo {
     text-align: center;
-    margin-bottom: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
   }
   
   .memberName {
@@ -184,6 +187,7 @@
     line-height: 1.5;
     margin-bottom: 16px;
     font-style: italic;
+    flex: 1;
   }
   
   .memberMeta {
@@ -191,6 +195,7 @@
     flex-direction: column;
     gap: 8px;
     align-items: center;
+    margin-bottom: 20px;
   }
   
   .joinDate {
@@ -212,7 +217,7 @@
     font-size: 14px;
   }
   
-  /* View Profile Button */
+  /* Always Visible View Profile Button */
   .viewProfileButton {
     display: flex;
     align-items: center;
@@ -221,55 +226,35 @@
     background: linear-gradient(135deg, #f59e0b, #d97706);
     color: white;
     border: none;
-    border-radius: 8px;
-    padding: 10px 16px;
+    border-radius: 10px;
+    padding: 12px 20px;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     font-family: 'Poppins', sans-serif;
     cursor: pointer;
     transition: all 0.3s ease;
-    margin-top: 8px;
+    margin-top: auto;
+    width: 100%;
   }
   
   .viewProfileButton:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(245, 158, 11, 0.3);
+    box-shadow: 0 6px 15px rgba(245, 158, 11, 0.4);
+    background: linear-gradient(135deg, #d97706, #b45309);
+  }
+  
+  .viewProfileButton:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.3);
   }
   
   .viewProfileButton .material-icons {
-    font-size: 16px;
-    transition: transform 0.3s ease;
-  }
-  
-  .memberCard:hover .viewProfileButton .material-icons {
-    transform: translateX(2px);
-  }
-  
-  .viewProfilePrompt {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    color: #f59e0b;
-    font-weight: 600;
-    font-size: 0.9rem;
-    opacity: 0;
-    transform: translateY(10px);
-    transition: all 0.3s ease;
-  }
-  
-  .memberCard:hover .viewProfilePrompt {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  
-  .viewProfilePrompt .material-icons {
     font-size: 18px;
     transition: transform 0.3s ease;
   }
   
-  .memberCard:hover .viewProfilePrompt .material-icons {
-    transform: translateX(4px);
+  .viewProfileButton:hover .material-icons {
+    transform: translateX(3px);
   }
   
   .sectionFooter {
@@ -329,6 +314,47 @@
     100% { transform: rotate(360deg); }
   }
   
+  .emptyState {
+    text-align: center;
+    padding: 60px 20px;
+    color: #6b7280;
+  }
+  
+  .emptyState .material-icons {
+    font-size: 64px;
+    color: #e2e8f0;
+    margin-bottom: 20px;
+  }
+  
+  .emptyState h3 {
+    color: #404040;
+    margin-bottom: 10px;
+  }
+  
+  .emptyState p {
+    margin-bottom: 25px;
+  }
+  
+  .retryButton {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  .retryButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+  }
+  
   /* Responsive Design */
   @media (max-width: 768px) {
     .newestMembersSection {
@@ -357,6 +383,11 @@
     .viewAllButton {
       padding: 14px 24px;
       font-size: 1rem;
+    }
+  
+    .viewProfileButton {
+      padding: 10px 16px;
+      font-size: 0.9rem;
     }
   }
   
