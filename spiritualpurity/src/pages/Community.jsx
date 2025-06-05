@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import FeaturedMembers from '../components/FeaturedMembers';
+import API_CONFIG from '../config/api';
 import styles from '../styles/Community.module.css';
 
 const Community = () => {
@@ -25,7 +26,7 @@ const Community = () => {
   const fetchCommunityData = async () => {
     try {
       // Fetch community statistics
-      const membersResponse = await fetch('http://localhost:5001/api/users/newest-members');
+      const membersResponse = await fetch(`${API_CONFIG.BASE_URL}/api/users/newest-members`);
       
       if (membersResponse.ok) {
         const membersData = await membersResponse.json();

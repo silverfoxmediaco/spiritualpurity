@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import API_CONFIG from '../config/api';
 import styles from '../styles/FeaturedMembers.module.css';
 
 const FeaturedMembers = ({ limit = 4, showTitle = true, showViewAllButton = true }) => {
@@ -18,12 +19,12 @@ const FeaturedMembers = ({ limit = 4, showTitle = true, showViewAllButton = true
   const fetchFeaturedMembers = async () => {
     try {
       const token = localStorage.getItem('token');
-      let endpoint = 'http://localhost:5001/api/users/newest-members';
+      let endpoint = `${API_CONFIG.BASE_URL}/api/users/newest-members`;
       let headers = { 'Content-Type': 'application/json' };
 
       // Try personalized endpoint if user is logged in
       if (token) {
-        endpoint = 'http://localhost:5001/api/users/personalized-featured';
+        endpoint = `${API_CONFIG.BASE_URL}/api/users/personalized-featured`;
         headers['Authorization'] = `Bearer ${token}`;
       }
 
@@ -58,7 +59,7 @@ const FeaturedMembers = ({ limit = 4, showTitle = true, showViewAllButton = true
 
   const fetchNewestMembersFallback = async () => {
     try {
-      const response = await fetch('http://localhost:5001/api/users/newest-members');
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/users/newest-members`);
       const data = await response.json();
 
       if (data.success) {
@@ -134,7 +135,7 @@ const FeaturedMembers = ({ limit = 4, showTitle = true, showViewAllButton = true
             <div key={member._id} className={styles.memberCard} onClick={() => handleMemberClick(member._id)}>
               <div className={styles.memberImageWrapper}>
                 <img 
-                  src={member.profilePicture ? `http://localhost:5001${member.profilePicture}` : 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><rect width="80" height="80" fill="%23f59e0b"/><path d="M40 20c-5.5 0-10 4.5-10 10s4.5 10 10 10 10-4.5 10-10-4.5-10-10-10zm0 30c-8.3 0-15 3.3-15 7.5V65h30v-7.5c0-4.2-6.7-7.5-15-7.5z" fill="white"/></svg>'} 
+                  src={member.profilePicture ? `${API_CONFIG.BASE_URL}${member.profilePicture}` : 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><rect width="80" height="80" fill="%23f59e0b"/><path d="M40 20c-5.5 0-10 4.5-10 10s4.5 10 10 10 10-4.5 10-10-4.5-10-10-10zm0 30c-8.3 0-15 3.3-15 7.5V65h30v-7.5c0-4.2-6.7-7.5-15-7.5z" fill="white"/></svg>'} 
                   alt={`${member.firstName} ${member.lastName}`}
                   className={styles.memberImage}
                 />

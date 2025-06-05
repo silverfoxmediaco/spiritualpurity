@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import API_CONFIG from '../config/api';
 import styles from '../styles/PublicMemberProfile.module.css';
 
 const PublicMemberProfile = () => {
@@ -33,7 +34,7 @@ const PublicMemberProfile = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5001/api/users/public-profile/${id}`, {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/users/public-profile/${id}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -86,7 +87,7 @@ const PublicMemberProfile = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5001/api/messages/conversation/${member._id}`, {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/messages/conversation/${member._id}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -202,7 +203,7 @@ const PublicMemberProfile = () => {
                   <div className={styles.profileImageWrapper}>
                     {member?.profilePicture ? (
                       <img 
-                        src={`http://localhost:5001${member.profilePicture}`} 
+                        src={`${API_CONFIG.BASE_URL}${member.profilePicture}`} 
                         alt={`${member.firstName} ${member.lastName}`}
                         className={styles.profileImage}
                       />

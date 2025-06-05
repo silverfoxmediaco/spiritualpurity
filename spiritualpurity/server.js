@@ -96,17 +96,26 @@ app.get('/health', (req, res) => {
   });
 });
 
-// API Routes
-try {
-  app.use('/api/auth', require('./routes/auth'));
-  app.use('/api/users', require('./routes/users'));
-  app.use('/api/messages', require('./routes/messages'));
-  app.use('/api/advertisers', require('./routes/advertisers'));
-  console.log('All routes loaded successfully');
-} catch (error) {
-  console.error('Error loading routes:', error);
-  console.log('Some API routes may not be available');
-}
+// API Routes - Load only existing routes
+const routesToLoad = [
+  { path: '/api/auth', file: './routes/auth' },
+  { path: '/api/users', file: './routes/users' },
+  { path: '/api/messages', file: './routes/messages' },
+  { path: '/api/advertisers', file: './routes/advertisers' }
+];
+
+routesToLoad.forEach(route => {
+  try {
+    if (fs.existsSync(route.file + '.js')) {
+      app.use(route.path, require(route.file));
+      console.log(`✅ Loaded route: ${route.path}`);
+    } else {
+      console.log(`⚠️  Route file not found: ${route.file}.js`);
+    }
+  } catch (error) {
+    console.error(`❌ Error loading route ${route.path}:`, error.message);
+  }
+});
 
 // Serve static files from React build (PRODUCTION)
 if (process.env.NODE_ENV === 'production') {
@@ -168,7 +177,7 @@ app.use((err, req, res, next) => {
 });
 
 // CRITICAL: Render requires binding to all interfaces and using PORT env var
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 5001;
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is running on port ${PORT}`);

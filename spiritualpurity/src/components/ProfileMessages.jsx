@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import API_CONFIG from '../config/api';
 import styles from '../styles/ProfileMessages.module.css';
 
 const ProfileMessages = ({ currentUser }) => {
@@ -36,7 +37,7 @@ const ProfileMessages = ({ currentUser }) => {
   const fetchConversations = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5001/api/messages/conversations', {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/messages/conversations`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -61,7 +62,7 @@ const ProfileMessages = ({ currentUser }) => {
   const fetchMessages = async (conversationId) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5001/api/messages/${conversationId}`, {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/messages/${conversationId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -85,7 +86,7 @@ const ProfileMessages = ({ currentUser }) => {
     setSendingMessage(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5001/api/messages/${selectedConversation._id}`, {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/messages/${selectedConversation._id}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -202,7 +203,7 @@ const ProfileMessages = ({ currentUser }) => {
                     <div className={styles.participantAvatar}>
                       {conversation.participant.profilePicture ? (
                         <img 
-                          src={`http://localhost:5001${conversation.participant.profilePicture}`}
+                          src={`${API_CONFIG.BASE_URL}${conversation.participant.profilePicture}`}
                           alt={conversation.participant.name}
                         />
                       ) : (
@@ -239,7 +240,7 @@ const ProfileMessages = ({ currentUser }) => {
                       <div className={styles.participantAvatar}>
                         {selectedConversation.participant.profilePicture ? (
                           <img 
-                            src={`http://localhost:5001${selectedConversation.participant.profilePicture}`}
+                            src={`${API_CONFIG.BASE_URL}${selectedConversation.participant.profilePicture}`}
                             alt={selectedConversation.participant.name}
                           />
                         ) : (
@@ -329,7 +330,7 @@ const ProfileMessages = ({ currentUser }) => {
                 <div className={styles.participantAvatar}>
                   {conversation.participant.profilePicture ? (
                     <img 
-                      src={`http://localhost:5001${conversation.participant.profilePicture}`}
+                      src={`${API_CONFIG.BASE_URL}${conversation.participant.profilePicture}`}
                       alt={conversation.participant.name}
                     />
                   ) : (

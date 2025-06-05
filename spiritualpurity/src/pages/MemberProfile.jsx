@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import ProfileMessages from '../components/ProfileMessages';
+import API_CONFIG from '../config/api';
 import styles from '../styles/MemberProfile.module.css';
 
 const MemberProfile = () => {
@@ -52,7 +53,7 @@ const MemberProfile = () => {
         return;
       }
 
-      const response = await fetch('http://localhost:5001/api/users/profile', {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/users/profile`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -122,7 +123,7 @@ const MemberProfile = () => {
     
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5001/api/users/profile', {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/users/profile`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -162,7 +163,7 @@ const MemberProfile = () => {
       const formData = new FormData();
       formData.append('avatar', profilePictureFile);
 
-      const response = await fetch('http://localhost:5001/api/users/upload-avatar', {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/users/upload-avatar`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -197,7 +198,7 @@ const MemberProfile = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5001/api/users/prayer-request', {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/users/prayer-request`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -228,7 +229,7 @@ const MemberProfile = () => {
   const handleMarkPrayerAnswered = async (prayerRequestId) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5001/api/users/prayer-request/${prayerRequestId}`, {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/users/prayer-request/${prayerRequestId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -241,7 +242,7 @@ const MemberProfile = () => {
 
       if (data.success) {
         fetchUserProfile();
-        alert('Prayer marked as answered! Praise God! 🙏');
+        alert('Prayer marked as answered! Praise God!');
       } else {
         setError(data.message || 'Failed to update prayer request');
       }
@@ -292,7 +293,7 @@ const MemberProfile = () => {
                   <div className={styles.profilePictureWrapper}>
                     {user?.profilePicture ? (
                       <img 
-                        src={`http://localhost:5001${user.profilePicture}`} 
+                        src={`${API_CONFIG.BASE_URL}${user.profilePicture}`} 
                         alt="Profile" 
                         className={styles.profilePicture}
                       />
@@ -632,7 +633,7 @@ const MemberProfile = () => {
                                     <span className={styles.privateTag}>Private</span>
                                   )}
                                   {prayer.isAnswered && (
-                                    <span className={styles.answeredTag}>Answered 🙏</span>
+                                    <span className={styles.answeredTag}>Answered</span>
                                   )}
                                 </div>
                               </div>
@@ -652,7 +653,7 @@ const MemberProfile = () => {
                       </div>
                     </div>
 
-                    {/* Messages Section - ADD THIS NEW SECTION */}
+                    {/* Messages Section */}
                     <ProfileMessages currentUser={user} />
 
                   </div>

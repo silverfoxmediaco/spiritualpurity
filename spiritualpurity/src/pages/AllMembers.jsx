@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
+import API_CONFIG from '../config/api';
 import styles from '../styles/AllMembers.module.css';
 
 const AllMembers = () => {
@@ -26,7 +27,7 @@ const AllMembers = () => {
 
   const fetchAllMembers = async () => {
     try {
-      const response = await fetch('http://localhost:5001/api/users/all-members');
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/users/all-members`);
       const data = await response.json();
 
       if (data.success) {
@@ -235,7 +236,7 @@ const AllMembers = () => {
                     <div className={styles.memberImageWrapper}>
                       {member.profilePicture ? (
                         <img 
-                          src={`http://localhost:5001${member.profilePicture}`}
+                          src={`${API_CONFIG.BASE_URL}${member.profilePicture}`}
                           alt={`${member.firstName} ${member.lastName}`}
                           className={styles.memberImage}
                         />
