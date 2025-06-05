@@ -38,7 +38,7 @@ const Home = () => {
                 >
                   Join Today
                 </button>
-                <p>It's Free and always will be.</p>
+                <p style={{ marginTop: '10px' }}>It's Free and always will be.</p>
               </div>
             </div>
           </div>
