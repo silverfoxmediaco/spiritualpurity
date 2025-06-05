@@ -36,10 +36,7 @@ const Home = () => {
                   className="btn btn-primary btn-lg me-3"
                   onClick={openRegistrationModal}
                 >
-                  Join Our Community
-                </button>
-                <button className="btn btn-outline-secondary btn-lg">
-                  Learn More
+                  Join Today
                 </button>
               </div>
             </div>
