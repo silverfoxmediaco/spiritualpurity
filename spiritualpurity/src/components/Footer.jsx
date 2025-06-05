@@ -27,59 +27,42 @@ const Footer = () => {
                   A sacred community for believers to connect, grow, and strengthen their faith in God and Jesus Christ.
                 </p>
                 <div className={styles.socialLinks}>
-                  <a href="#" className={styles.socialLink} aria-label="Facebook">
-                    <i className="fab fa-facebook-f"></i>
-                  </a>
-                  <a href="#" className={styles.socialLink} aria-label="Twitter">
-                    <i className="fab fa-twitter"></i>
-                  </a>
-                  <a href="#" className={styles.socialLink} aria-label="Instagram">
-                    <i className="fab fa-instagram"></i>
-                  </a>
-                  <a href="#" className={styles.socialLink} aria-label="YouTube">
-                    <i className="fab fa-youtube"></i>
-                  </a>
+                  {/* Removed dead social links - can be added back when real accounts are created */}
                 </div>
               </div>
             </div>
 
-            {/* Quick Links */}
+            {/* Quick Links - Only Working Pages */}
             <div className="col-lg-2 col-md-6 mb-4">
               <h5 className={styles.footerHeading}>Community</h5>
               <ul className={styles.footerLinks}>
                 <li><Link to="/">Home</Link></li>
                 <li><Link to="/members">All Members</Link></li>
-                <li><Link to="/prayer">Prayer Wall</Link></li>
-                <li><Link to="/bible-study">Bible Study</Link></li>
-                <li><Link to="/testimonies">Testimonies</Link></li>
+                <li><Link to="/community">Community</Link></li>
+                <li><Link to="/prayer">Prayer</Link></li>
               </ul>
             </div>
 
-            {/* Resources */}
+            {/* Resources - With Advertising Link Added */}
             <div className="col-lg-2 col-md-6 mb-4">
               <h5 className={styles.footerHeading}>Resources</h5>
               <ul className={styles.footerLinks}>
-                <li><Link to="/devotionals">Daily Devotionals</Link></li>
-                <li><Link to="/sermons">Sermons</Link></li>
-                <li><Link to="/scripture">Scripture Study</Link></li>
-                <li><Link to="/worship">Worship Music</Link></li>
-                <li><Link to="/events">Events</Link></li>
+                <li><Link to="/resources">Resources</Link></li>
+                <li><Link to="/advertiser/register">Advertise With Us</Link></li>
+                <li><Link to="/advertiser/dashboard">Advertiser Dashboard</Link></li>
               </ul>
             </div>
 
-            {/* Support */}
+            {/* Support - Only Essential Links */}
             <div className="col-lg-2 col-md-6 mb-4">
               <h5 className={styles.footerHeading}>Support</h5>
               <ul className={styles.footerLinks}>
-                <li><Link to="/help">Help Center</Link></li>
-                <li><Link to="/contact">Contact Us</Link></li>
-                <li><Link to="/guidelines">Community Guidelines</Link></li>
-                <li><Link to="/safety">Safety & Privacy</Link></li>
-                <li><Link to="/feedback">Feedback</Link></li>
+                <li><a href="mailto:support@spiritualpurity.com">Contact Us</a></li>
+                {/* Removed dead links - these pages don't exist yet */}
               </ul>
             </div>
 
-            {/* Newsletter Signup */}
+            {/* Bible Verse Section */}
             <div className="col-lg-2 col-md-12 mb-4">
               <div className={styles.bibleVerse}>
                 <p className={styles.verseText}>
@@ -103,9 +86,8 @@ const Footer = () => {
             </div>
             <div className="col-md-6">
               <div className={styles.legalLinks}>
-                <Link to="/privacy">Privacy Policy</Link>
-                <Link to="/terms">Terms of Service</Link>
-                <Link to="/cookies">Cookie Policy</Link>
+                {/* Removed dead legal links - these pages don't exist yet */}
+                {/* Can be added back when privacy policy, terms, etc. are created */}
               </div>
             </div>
           </div>
