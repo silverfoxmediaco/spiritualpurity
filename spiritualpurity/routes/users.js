@@ -1,7 +1,7 @@
 // spiritualpurity-backend/routes/users.js
 
 const express = require('express');
-const User = require('./models/User');
+const User = require('../models/User'); // Fixed: Added .. to go up one directory
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
@@ -110,6 +110,8 @@ function calculateCompatibilityScore(currentUser, otherUser) {
 // @access  Public
 router.get('/newest-members', async (req, res) => {
   try {
+    console.log('GET /api/users/newest-members called'); // Debug log
+    
     // Get the 6 most recent active members
     const members = await User.find({ 
       isActive: true 
@@ -117,6 +119,8 @@ router.get('/newest-members', async (req, res) => {
     .select('firstName lastName profilePicture bio location relationshipStatus privacy joinDate')
     .sort({ joinDate: -1 })
     .limit(6);
+
+    console.log(`Found ${members.length} members`); // Debug log
 
     // Filter out users who have privacy settings that would hide them
     const publicMembers = members.map(member => {
@@ -145,6 +149,8 @@ router.get('/newest-members', async (req, res) => {
       };
     });
 
+    console.log('Sending response with members:', publicMembers.length); // Debug log
+
     res.json({
       success: true,
       message: 'Newest members retrieved successfully',
@@ -158,7 +164,8 @@ router.get('/newest-members', async (req, res) => {
     console.error('Get newest members error:', error);
     res.status(500).json({
       success: false,
-      message: 'Server error while retrieving newest members'
+      message: 'Server error while retrieving newest members',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });

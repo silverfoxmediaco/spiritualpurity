@@ -1,12 +1,46 @@
 // spiritualpurity-backend/routes/messages.js
 
 const express = require('express');
-const Conversation = require('./models/Conversation');
-const Message = require('./models/Message');
-const User = require('./models/User');
-const { authenticateToken } = require('./middleware/auth');
+const Conversation = require('../models/Conversation'); // Fixed: Added .. to go up one directory
+const Message = require('../models/Message'); // Fixed: Added .. to go up one directory
+const User = require('../models/User'); // Fixed: Added .. to go up one directory
 
 const router = express.Router();
+
+// Middleware to verify JWT token
+const authenticateToken = async (req, res, next) => {
+  try {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: 'Access token required'
+      });
+    }
+
+    const jwt = require('jsonwebtoken');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.userId);
+
+    if (!user || !user.isActive) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid or expired token'
+      });
+    }
+
+    req.user = user;
+    next();
+  } catch (error) {
+    console.error('Token verification error:', error);
+    return res.status(401).json({
+      success: false,
+      message: 'Invalid token'
+    });
+  }
+};
 
 // @route   GET /api/messages/conversations
 // @desc    Get all conversations for current user
@@ -165,25 +199,25 @@ router.get('/:conversationId', authenticateToken, async (req, res) => {
     // Get messages with pagination (newest first)
     const messages = await Message.find({
       conversation: conversationId,
-      isDeleted: { $ne: true }
+      'deletedBy.user': { $ne: req.user._id },
+      'reported.moderationStatus': { $ne: 'removed' }
     })
     .populate('sender', 'firstName lastName profilePicture')
     .sort({ createdAt: -1 })
     .limit(limit * 1)
     .skip((page - 1) * limit);
 
-    // Mark messages as read
-    await Message.updateMany(
-      {
-        conversation: conversationId,
-        sender: { $ne: req.user._id },
-        isRead: false
-      },
-      {
-        isRead: true,
-        readAt: new Date()
-      }
-    );
+    // Mark messages as read by updating the readBy array
+    const unreadMessages = await Message.find({
+      conversation: conversationId,
+      sender: { $ne: req.user._id },
+      'readBy.user': { $ne: req.user._id }
+    });
+
+    // Mark each unread message as read
+    for (const message of unreadMessages) {
+      await message.markAsRead(req.user._id);
+    }
 
     // Reset unread count for current user
     conversation.unreadCount.set(req.user._id.toString(), 0);
@@ -314,8 +348,8 @@ router.delete('/message/:messageId', authenticateToken, async (req, res) => {
       });
     }
 
-    message.isDeleted = true;
-    await message.save();
+    // Use the soft delete method
+    await message.deleteForUser(req.user._id);
 
     res.json({
       success: true,
