@@ -29,7 +29,7 @@ const Home = () => {
             <div className="col-12 text-center">
               <h1 className={styles.heroTitle}>Welcome to Spiritual Purity</h1>
               <p className={styles.heroSubtitle}>
-              A place to walk in faith with others—to share your story and life struggles, and how you have grown in the transforming grace of God.
+              We are not a place of Purity but a place to walk in faith with others—to share your story and how you have healed in the transforming grace of God.
               </p>
               <div className={styles.heroButtons}>
                 <button 
@@ -66,7 +66,7 @@ const Home = () => {
                   <span className="material-icons">groups</span>
                 </div>
                 <h3>Prayer Community</h3>
-                <p>Join believers worldwide in prayer. Share your requests and pray for others in our supportive community.</p>
+                <p>Join other members worldwide in prayer. Share your requests and pray for others in our supportive community.</p>
               </div>
             </div>
             <div className="col-md-4 mb-4">
@@ -98,7 +98,7 @@ const Home = () => {
             <div className="col-12 text-center">
               <h2 className={styles.ctaTitle}>Ready to Begin Your Journey?</h2>
               <p className={styles.ctaSubtitle}>
-                Join thousands of believers who are growing stronger in their faith together
+                Join thousands of people who are growing stronger in their faith together
               </p>
               <div className={styles.ctaButtons}>
                 <button 
@@ -106,9 +106,6 @@ const Home = () => {
                   onClick={openRegistrationModal}
                 >
                   Get Started
-                </button>
-                <button className="btn btn-outline-light btn-lg">
-                  Explore Features
                 </button>
               </div>
             </div>
