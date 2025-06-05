@@ -1,6 +1,6 @@
 // src/pages/PublicMemberProfile.jsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -13,24 +13,17 @@ const PublicMemberProfile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [currentUser, setCurrentUser] = useState(null);
-  const [isConnected, setIsConnected] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState('none'); // 'none', 'pending', 'connected'
 
-  useEffect(() => {
-    checkCurrentUser();
-    fetchMemberProfile();
-  }, [id]);
-
-  const checkCurrentUser = () => {
+  const checkCurrentUser = useCallback(() => {
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('user');
     
     if (token && userData) {
       setCurrentUser(JSON.parse(userData));
     }
-  };
+  }, []);
 
-  const fetchMemberProfile = async () => {
+  const fetchMemberProfile = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       
@@ -60,7 +53,12 @@ const PublicMemberProfile = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    checkCurrentUser();
+    fetchMemberProfile();
+  }, [checkCurrentUser, fetchMemberProfile]);
 
   const handleConnect = async () => {
     if (!currentUser) {

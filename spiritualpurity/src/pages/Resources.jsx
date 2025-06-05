@@ -1,6 +1,6 @@
 // src/pages/Resources.jsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -9,7 +9,6 @@ import styles from '../styles/Resources.module.css';
 const Resources = () => {
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   // Mix of free and paid listings - paid listings get premium placement and features
