@@ -1,7 +1,7 @@
 // spiritualpurity-backend/routes/users.js
 
 const express = require('express');
-const User = require('../models/User');
+const User = require('./models/User');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');

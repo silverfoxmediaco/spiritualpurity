@@ -1,10 +1,10 @@
 // spiritualpurity-backend/routes/advertisers.js
 
 const express = require('express');
-const Advertiser = require('../models/Advertiser');
-const Advertisement = require('../models/Advertisement');
+const Advertiser = require('./models/Advertiser');
+const Advertisement = require('./models/Advertiser');
 const AdInteraction = require('../models/AdInteraction');
-const { authenticateToken } = require('../middleware/auth');
+const { authenticateToken } = require('./middleware/auth');
 const multer = require('multer');
 const path = require('path');
 

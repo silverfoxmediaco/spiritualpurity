@@ -1,10 +1,10 @@
 // spiritualpurity-backend/routes/messages.js
 
 const express = require('express');
-const Conversation = require('../models/Conversation');
-const Message = require('../models/Message');
-const User = require('../models/User');
-const { authenticateToken } = require('../middleware/auth');
+const Conversation = require('./models/Conversation');
+const Message = require('./models/Message');
+const User = require('./models/User');
+const { authenticateToken } = require('./middleware/auth');
 
 const router = express.Router();
 
