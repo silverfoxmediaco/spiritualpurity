@@ -14,6 +14,12 @@ const PublicMemberProfile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [currentUser, setCurrentUser] = useState(null);
+  const [connectionStatus, setConnectionStatus] = useState('none');
+  const [mutualConnections, setMutualConnections] = useState(0);
+  const [actionLoading, setActionLoading] = useState({
+    connect: false,
+    message: false
+  });
 
   const checkCurrentUser = useCallback(() => {
     const token = localStorage.getItem('token');
@@ -45,6 +51,8 @@ const PublicMemberProfile = () => {
 
       if (data.success) {
         setMember(data.data.user);
+        // Fetch connection status after getting member data
+        fetchConnectionStatus();
       } else {
         setError(data.message || 'Member not found');
       }
@@ -55,6 +63,26 @@ const PublicMemberProfile = () => {
       setLoading(false);
     }
   }, [id]);
+
+  const fetchConnectionStatus = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/connections/status/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setConnectionStatus(data.data.status);
+        setMutualConnections(data.data.mutualConnections);
+      }
+    } catch (error) {
+      console.error('Error fetching connection status:', error);
+    }
+  };
 
   useEffect(() => {
     checkCurrentUser();
@@ -67,12 +95,44 @@ const PublicMemberProfile = () => {
       return;
     }
 
+    if (connectionStatus === 'sent') {
+      alert('Connection request already sent');
+      return;
+    }
+
+    if (connectionStatus === 'connected') {
+      alert('You are already connected with this member');
+      return;
+    }
+
+    setActionLoading(prev => ({ ...prev, connect: true }));
+
     try {
-      // TODO: Implement connection functionality when you build the social features
-      // For now, just show a message
-      alert('Connection feature coming soon! You can send them a prayer instead.');
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/connections/send-request`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          recipientId: member._id,
+          message: `Hi ${member.firstName}, I'd like to connect with you on our faith journey!`
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setConnectionStatus('sent');
+        alert(`Connection request sent to ${member.firstName}!`);
+      } else {
+        alert(data.message || 'Failed to send connection request');
+      }
     } catch (error) {
       console.error('Connection error:', error);
+      alert('Failed to send connection request. Please try again.');
+    } finally {
+      setActionLoading(prev => ({ ...prev, connect: false }));
     }
   };
 
@@ -84,6 +144,8 @@ const PublicMemberProfile = () => {
       navigate('/');
       return;
     }
+
+    setActionLoading(prev => ({ ...prev, message: true }));
 
     try {
       const token = localStorage.getItem('token');
@@ -108,6 +170,8 @@ const PublicMemberProfile = () => {
     } catch (error) {
       console.error('Error starting conversation:', error);
       alert('Failed to start conversation. Please try again.');
+    } finally {
+      setActionLoading(prev => ({ ...prev, message: false }));
     }
   };
 
@@ -127,6 +191,32 @@ const PublicMemberProfile = () => {
       day: 'numeric',
       year: 'numeric'
     });
+  };
+
+  const getConnectionButtonText = () => {
+    switch (connectionStatus) {
+      case 'connected':
+        return 'Connected';
+      case 'sent':
+        return 'Request Sent';
+      case 'received':
+        return 'Accept Request';
+      default:
+        return 'Connect';
+    }
+  };
+
+  const getConnectionButtonIcon = () => {
+    switch (connectionStatus) {
+      case 'connected':
+        return 'people';
+      case 'sent':
+        return 'hourglass_empty';
+      case 'received':
+        return 'person_add';
+      default:
+        return 'person_add';
+    }
   };
 
   // Helper function to get the correct image URL
@@ -261,17 +351,36 @@ const PublicMemberProfile = () => {
                         <span>{member.relationshipStatus}</span>
                       </div>
                     )}
+
+                    {/* Mutual Connections */}
+                    {mutualConnections > 0 && (
+                      <div className={styles.mutualConnections}>
+                        <span className="material-icons">people</span>
+                        <span>{mutualConnections} mutual connection{mutualConnections > 1 ? 's' : ''}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
                 
                 <div className={styles.profileActions}>
                   <button 
                     onClick={handleConnect} 
-                    className={styles.connectButton}
+                    className={`${styles.connectButton} ${connectionStatus === 'connected' ? styles.connected : ''}`}
+                    disabled={actionLoading.connect || connectionStatus === 'connected'}
                   >
-                    <span className="material-icons">person_add</span>
-                    Connect
+                    <span className="material-icons">{getConnectionButtonIcon()}</span>
+                    {actionLoading.connect ? 'Connecting...' : getConnectionButtonText()}
                   </button>
+                  
+                  <button 
+                    onClick={handleSendMessage}
+                    className={styles.messageButton}
+                    disabled={actionLoading.message}
+                  >
+                    <span className="material-icons">message</span>
+                    {actionLoading.message ? 'Starting...' : 'Message'}
+                  </button>
+                  
                   <button 
                     onClick={handleSendPrayer} 
                     className={styles.prayButton}
@@ -392,18 +501,26 @@ const PublicMemberProfile = () => {
                         <button 
                           onClick={handleSendMessage}
                           className={styles.actionButton}
+                          disabled={actionLoading.message}
                         >
                           <span className="material-icons">message</span>
-                          Send Message
+                          {actionLoading.message ? 'Starting...' : 'Send Message'}
                         </button>
-                        <button onClick={handleConnect} className={styles.actionButton}>
-                          <span className="material-icons">person_add</span>
-                          Send Connection Request
+                        
+                        <button 
+                          onClick={handleConnect} 
+                          className={styles.actionButton}
+                          disabled={actionLoading.connect || connectionStatus === 'connected'}
+                        >
+                          <span className="material-icons">{getConnectionButtonIcon()}</span>
+                          {actionLoading.connect ? 'Connecting...' : getConnectionButtonText()}
                         </button>
+                        
                         <button onClick={handleSendPrayer} className={styles.actionButton}>
                           <span className="material-icons">volunteer_activism</span>
                           Pray for {member?.firstName}
                         </button>
+                        
                         <button 
                           onClick={() => navigate('/prayer')} 
                           className={styles.actionButton}
@@ -413,6 +530,42 @@ const PublicMemberProfile = () => {
                         </button>
                       </div>
                     </div>
+
+                    {/* Connection Status Card */}
+                    {connectionStatus !== 'none' && (
+                      <div className={styles.sidebarCard}>
+                        <h4>
+                          <span className="material-icons">people</span>
+                          Connection Status
+                        </h4>
+                        <div className={styles.connectionStatus}>
+                          {connectionStatus === 'connected' && (
+                            <div className={styles.statusConnected}>
+                              <span className="material-icons">check_circle</span>
+                              <span>You are connected with {member?.firstName}</span>
+                            </div>
+                          )}
+                          {connectionStatus === 'sent' && (
+                            <div className={styles.statusPending}>
+                              <span className="material-icons">hourglass_empty</span>
+                              <span>Connection request sent</span>
+                            </div>
+                          )}
+                          {connectionStatus === 'received' && (
+                            <div className={styles.statusReceived}>
+                              <span className="material-icons">notification_important</span>
+                              <span>{member?.firstName} wants to connect with you</span>
+                            </div>
+                          )}
+                          {mutualConnections > 0 && (
+                            <div className={styles.mutualInfo}>
+                              <span className="material-icons">group</span>
+                              <span>{mutualConnections} mutual connection{mutualConnections > 1 ? 's' : ''}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
 
                     {/* Interests Card */}
                     {member?.interests && member?.interests.length > 0 && member?.privacy?.showInterests && (

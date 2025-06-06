@@ -551,6 +551,170 @@
   .joinButton .material-icons {
     font-size: 20px;
   }
+
+  /* Add these styles to your existing AllMembers.module.css file */
+
+/* Connection Status Badge */
+.connectedBadge {
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    background: #10b981;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  }
+  
+  .connectedBadge .material-icons {
+    font-size: 12px;
+    color: white;
+  }
+  
+  /* Connection Status Display */
+  .connectionStatusDisplay {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 4px 8px;
+    border-radius: 12px;
+  }
+  
+  .connectionStatusDisplay.connected {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+  }
+  
+  .connectionStatusDisplay.sent {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+  }
+  
+  .connectionStatusDisplay.received {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+  }
+  
+  .connectionStatusDisplay .material-icons {
+    font-size: 14px;
+  }
+  
+  /* Updated Member Actions */
+  .memberActions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  
+  .connectButton {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 100px;
+  }
+  
+  .connectButton:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+  }
+  
+  .connectButton.connected {
+    background: linear-gradient(135deg, #10b981, #059669);
+  }
+  
+  .connectButton.connected:hover {
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  }
+  
+  .connectButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+  
+  .messageButton {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 100px;
+  }
+  
+  .messageButton:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  }
+  
+  .messageButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+  
+  .editProfileButton {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: linear-gradient(135deg, #6b7280, #4b5563);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 100px;
+  }
+  
+  .editProfileButton:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+  }
+  
+  .viewProfileButton .material-icons,
+  .connectButton .material-icons,
+  .messageButton .material-icons,
+  .editProfileButton .material-icons {
+    font-size: 16px;
+  }
+  
+
   
   /* Responsive Design */
   @media (max-width: 768px) {
@@ -615,6 +779,28 @@
       font-size: 1rem;
       padding: 0 20px;
     }
+
+
+    .memberActions {
+        flex-direction: column;
+        gap: 6px;
+      }
+    
+      .connectButton,
+      .messageButton,
+      .editProfileButton {
+        min-width: auto;
+        width: 100%;
+      }
+    
+      .connectionStatusDisplay {
+        font-size: 0.75rem;
+        padding: 3px 6px;
+      }
+    
+      .connectionStatusDisplay .material-icons {
+        font-size: 12px;
+      }
   }
   
   @media (max-width: 480px) {
@@ -630,4 +816,19 @@
     .searchBar {
       padding: 0 20px;
     }
+
+    .memberCard {
+        padding: 16px;
+      }
+    
+      .memberActions {
+        gap: 4px;
+      }
+    
+      .connectButton,
+      .messageButton,
+      .editProfileButton {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+      }
   }

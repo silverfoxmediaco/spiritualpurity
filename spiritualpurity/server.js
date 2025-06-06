@@ -80,6 +80,11 @@ async function createDatabaseIndexes() {
     await db.collection('messages').createIndex({ conversation: 1, createdAt: -1 });
     await db.collection('messages').createIndex({ sender: 1 });
     
+    // Connection indexes
+    await db.collection('connections').createIndex({ requester: 1, recipient: 1 }, { unique: true });
+    await db.collection('connections').createIndex({ recipient: 1, status: 1 });
+    await db.collection('connections').createIndex({ requester: 1, status: 1 });
+    
     console.log('Database indexes created successfully');
   } catch (error) {
     console.error('Error creating indexes:', error);
@@ -101,6 +106,7 @@ const routesToLoad = [
   { path: '/api/auth', file: './routes/auth' },
   { path: '/api/users', file: './routes/users' },
   { path: '/api/messages', file: './routes/messages' },
+  { path: '/api/connections', file: './routes/connections' }, // NEW: Added connections route
   { path: '/api/advertisers', file: './routes/advertisers' }
 ];
 
@@ -136,6 +142,7 @@ if (process.env.NODE_ENV === 'production') {
         auth: '/api/auth',
         users: '/api/users', 
         messages: '/api/messages',
+        connections: '/api/connections', // NEW: Added to endpoints list
         advertisers: '/api/advertisers'
       }
     });

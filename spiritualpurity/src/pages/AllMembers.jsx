@@ -15,6 +15,8 @@ const AllMembers = () => {
   const [filterLocation, setFilterLocation] = useState('');
   const [filterRelationship, setFilterRelationship] = useState('');
   const [sortBy, setSortBy] = useState('newest');
+  const [connectionStatuses, setConnectionStatuses] = useState({});
+  const [actionLoading, setActionLoading] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,6 +34,11 @@ const AllMembers = () => {
 
       if (data.success) {
         setMembers(data.data.members);
+        // Fetch connection statuses for logged in users
+        const token = localStorage.getItem('token');
+        if (token) {
+          fetchConnectionStatuses(data.data.members);
+        }
       } else {
         setError('Failed to load members');
       }
@@ -40,6 +47,47 @@ const AllMembers = () => {
       setError('Network error loading members');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchConnectionStatuses = async (membersList) => {
+    try {
+      const token = localStorage.getItem('token');
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      
+      // Only fetch for members that aren't the current user
+      const otherMembers = membersList.filter(member => member._id !== currentUser._id);
+      
+      const statusPromises = otherMembers.map(async (member) => {
+        try {
+          const response = await fetch(`${API_CONFIG.BASE_URL}/api/connections/status/${member._id}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          });
+          const data = await response.json();
+          return {
+            memberId: member._id,
+            status: data.success ? data.data.status : 'none'
+          };
+        } catch (error) {
+          return {
+            memberId: member._id,
+            status: 'none'
+          };
+        }
+      });
+
+      const statuses = await Promise.all(statusPromises);
+      const statusMap = statuses.reduce((acc, { memberId, status }) => {
+        acc[memberId] = status;
+        return acc;
+      }, {});
+
+      setConnectionStatuses(statusMap);
+    } catch (error) {
+      console.error('Error fetching connection statuses:', error);
     }
   };
 
@@ -87,6 +135,91 @@ const AllMembers = () => {
     navigate(`/member/${memberId}`);
   };
 
+  const handleConnect = async (memberId, memberName) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Please log in to connect with members');
+      return;
+    }
+
+    const currentStatus = connectionStatuses[memberId];
+    if (currentStatus === 'connected') {
+      alert('You are already connected with this member');
+      return;
+    }
+    if (currentStatus === 'sent') {
+      alert('Connection request already sent');
+      return;
+    }
+
+    setActionLoading(prev => ({ ...prev, [memberId]: 'connect' }));
+
+    try {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/connections/send-request`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          recipientId: memberId,
+          message: `Hi ${memberName}, I'd like to connect with you on our faith journey!`
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setConnectionStatuses(prev => ({
+          ...prev,
+          [memberId]: 'sent'
+        }));
+        alert(`Connection request sent to ${memberName}!`);
+      } else {
+        alert(data.message || 'Failed to send connection request');
+      }
+    } catch (error) {
+      console.error('Connection error:', error);
+      alert('Failed to send connection request. Please try again.');
+    } finally {
+      setActionLoading(prev => ({ ...prev, [memberId]: null }));
+    }
+  };
+
+  const handleSendMessage = async (memberId) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Please log in to send messages');
+      return;
+    }
+
+    setActionLoading(prev => ({ ...prev, [memberId]: 'message' }));
+
+    try {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/messages/conversation/${memberId}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        navigate('/profile');
+        setTimeout(() => {
+          alert('Conversation started! Check your Messages section in your profile.');
+        }, 500);
+      } else {
+        alert(data.message || 'Failed to start conversation');
+      }
+    } catch (error) {
+      console.error('Error starting conversation:', error);
+      alert('Failed to start conversation. Please try again.');
+    } finally {
+      setActionLoading(prev => ({ ...prev, [memberId]: null }));
+    }
+  };
+
   const formatJoinDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { 
@@ -101,6 +234,32 @@ const AllMembers = () => {
     setFilterLocation('');
     setFilterRelationship('');
     setSortBy('newest');
+  };
+
+  const getConnectionButtonText = (status) => {
+    switch (status) {
+      case 'connected':
+        return 'Connected';
+      case 'sent':
+        return 'Sent';
+      case 'received':
+        return 'Accept';
+      default:
+        return 'Connect';
+    }
+  };
+
+  const getConnectionButtonIcon = (status) => {
+    switch (status) {
+      case 'connected':
+        return 'people';
+      case 'sent':
+        return 'hourglass_empty';
+      case 'received':
+        return 'person_add';
+      default:
+        return 'person_add';
+    }
   };
 
   // Helper function to get the correct image URL
@@ -147,6 +306,8 @@ const AllMembers = () => {
       </div>
     );
   }
+
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
 
   return (
     <div className={styles.allMembersPage}>
@@ -239,88 +400,139 @@ const AllMembers = () => {
             </div>
           ) : (
             <div className={styles.membersGrid}>
-              {filteredMembers.map((member) => (
-                <div 
-                  key={member._id}
-                  className={styles.memberCard}
-                  onClick={() => handleMemberClick(member._id)}
-                >
-                  <div className={styles.memberHeader}>
-                    <div className={styles.memberImageWrapper}>
-                      {member.profilePicture ? (
-                        <img 
-                          src={getProfileImageUrl(member.profilePicture)}
-                          alt={`${member.firstName} ${member.lastName}`}
-                          className={styles.memberImage}
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                            e.target.nextSibling.style.display = 'flex';
-                          }}
-                        />
-                      ) : null}
-                      <div className={styles.defaultAvatar} style={member.profilePicture ? {display: 'none'} : {}}>
-                        <span className="material-icons">person</span>
-                      </div>
-                      
-                      {/* New member indicator */}
-                      {new Date() - new Date(member.joinDate) < 30 * 24 * 60 * 60 * 1000 && (
-                        <div className={styles.newMemberBadge}>
-                          <span className="material-icons">fiber_new</span>
+              {filteredMembers.map((member) => {
+                const isCurrentUser = currentUser._id === member._id;
+                const connectionStatus = connectionStatuses[member._id] || 'none';
+                const isActionLoading = actionLoading[member._id];
+
+                return (
+                  <div 
+                    key={member._id}
+                    className={styles.memberCard}
+                  >
+                    <div className={styles.memberHeader}>
+                      <div className={styles.memberImageWrapper}>
+                        {member.profilePicture ? (
+                          <img 
+                            src={getProfileImageUrl(member.profilePicture)}
+                            alt={`${member.firstName} ${member.lastName}`}
+                            className={styles.memberImage}
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.nextSibling.style.display = 'flex';
+                            }}
+                          />
+                        ) : null}
+                        <div className={styles.defaultAvatar} style={member.profilePicture ? {display: 'none'} : {}}>
+                          <span className="material-icons">person</span>
                         </div>
-                      )}
+                        
+                        {/* New member indicator */}
+                        {new Date() - new Date(member.joinDate) < 30 * 24 * 60 * 60 * 1000 && (
+                          <div className={styles.newMemberBadge}>
+                            <span className="material-icons">fiber_new</span>
+                          </div>
+                        )}
+
+                        {/* Connection status indicator */}
+                        {!isCurrentUser && connectionStatus === 'connected' && (
+                          <div className={styles.connectedBadge}>
+                            <span className="material-icons">people</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className={styles.memberBasicInfo}>
+                        <h3 className={styles.memberName}>
+                          {member.firstName} {member.lastName}
+                        </h3>
+                        
+                        {member.location && member.privacy?.showLocation && (
+                          <p className={styles.memberLocation}>
+                            <span className="material-icons">location_on</span>
+                            {[member.location.city, member.location.state].filter(Boolean).join(', ')}
+                          </p>
+                        )}
+                      </div>
                     </div>
 
-                    <div className={styles.memberBasicInfo}>
-                      <h3 className={styles.memberName}>
-                        {member.firstName} {member.lastName}
-                      </h3>
-                      
-                      {member.location && member.privacy?.showLocation && (
-                        <p className={styles.memberLocation}>
-                          <span className="material-icons">location_on</span>
-                          {[member.location.city, member.location.state].filter(Boolean).join(', ')}
+                    <div className={styles.memberDetails}>
+                      {member.bio && (
+                        <p className={styles.memberBio}>
+                          {member.bio.length > 100 
+                            ? `${member.bio.substring(0, 100)}...` 
+                            : member.bio
+                          }
                         </p>
                       )}
-                    </div>
-                  </div>
 
-                  <div className={styles.memberDetails}>
-                    {member.bio && (
-                      <p className={styles.memberBio}>
-                        {member.bio.length > 100 
-                          ? `${member.bio.substring(0, 100)}...` 
-                          : member.bio
-                        }
-                      </p>
-                    )}
-
-                    <div className={styles.memberMeta}>
-                      <div className={styles.joinInfo}>
-                        <span className="material-icons">schedule</span>
-                        <span>Joined {formatJoinDate(member.joinDate)}</span>
-                      </div>
-
-                      {member.relationshipStatus && member.privacy?.showRelationshipStatus && (
-                        <div className={styles.relationshipInfo}>
-                          <span className="material-icons">favorite</span>
-                          <span>{member.relationshipStatus}</span>
+                      <div className={styles.memberMeta}>
+                        <div className={styles.joinInfo}>
+                          <span className="material-icons">schedule</span>
+                          <span>Joined {formatJoinDate(member.joinDate)}</span>
                         </div>
+
+                        {member.relationshipStatus && member.privacy?.showRelationshipStatus && (
+                          <div className={styles.relationshipInfo}>
+                            <span className="material-icons">favorite</span>
+                            <span>{member.relationshipStatus}</span>
+                          </div>
+                        )}
+
+                        {/* Connection Status Display */}
+                        {!isCurrentUser && connectionStatus !== 'none' && (
+                          <div className={`${styles.connectionStatusDisplay} ${styles[connectionStatus]}`}>
+                            <span className="material-icons">{getConnectionButtonIcon(connectionStatus)}</span>
+                            <span>{getConnectionButtonText(connectionStatus)}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className={styles.memberActions}>
+                      <button 
+                        className={styles.viewProfileButton}
+                        onClick={() => handleMemberClick(member._id)}
+                      >
+                        <span className="material-icons">visibility</span>
+                        View Profile
+                      </button>
+                      
+                      {!isCurrentUser && (
+                        <>
+                          <button 
+                            className={`${styles.connectButton} ${connectionStatus === 'connected' ? styles.connected : ''}`}
+                            onClick={() => handleConnect(member._id, member.firstName)}
+                            disabled={isActionLoading === 'connect' || connectionStatus === 'connected'}
+                          >
+                            <span className="material-icons">{getConnectionButtonIcon(connectionStatus)}</span>
+                            {isActionLoading === 'connect' ? 'Connecting...' : getConnectionButtonText(connectionStatus)}
+                          </button>
+                          
+                          <button 
+                            className={styles.messageButton}
+                            onClick={() => handleSendMessage(member._id)}
+                            disabled={isActionLoading === 'message'}
+                          >
+                            <span className="material-icons">message</span>
+                            {isActionLoading === 'message' ? 'Starting...' : 'Message'}
+                          </button>
+                        </>
+                      )}
+                      
+                      {isCurrentUser && (
+                        <button 
+                          className={styles.editProfileButton}
+                          onClick={() => navigate('/profile')}
+                        >
+                          <span className="material-icons">edit</span>
+                          Edit Profile
+                        </button>
                       )}
                     </div>
                   </div>
-
-                  <div className={styles.memberActions}>
-                    <button className={styles.viewProfileButton}>
-                      <span className="material-icons">visibility</span>
-                      View Profile
-                    </button>
-                    <button className={styles.connectButton}>
-                      <span className="material-icons">person_add</span>
-                      Connect
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
