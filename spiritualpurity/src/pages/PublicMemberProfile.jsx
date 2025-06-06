@@ -286,17 +286,7 @@ const PublicMemberProfile = () => {
         <div className="row">
           <div className="col-12">
             
-            {/* Back Navigation */}
-            <div className={styles.breadcrumb}>
-              <button onClick={() => navigate('/members')} className={styles.breadcrumbLink}>
-                <span className="material-icons">arrow_back</span>
-                All Members
-              </button>
-              <span className={styles.breadcrumbSeparator}>→</span>
-              <span className={styles.breadcrumbCurrent}>
-                {member?.firstName} {member?.lastName}
-              </span>
-            </div>
+
 
             <div className={styles.profileContainer}>
               
