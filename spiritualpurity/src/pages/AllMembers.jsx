@@ -459,9 +459,9 @@ const AllMembers = () => {
                     <div className={styles.memberDetails}>
                       {member.bio && (
                         <p className={styles.memberBio}>
-                          {member.bio.length > 100 
+                          {member.bio && member.bio.length > 100 
                             ? `${member.bio.substring(0, 100)}...` 
-                            : member.bio
+                            : member.bio || ''
                           }
                         </p>
                       )}

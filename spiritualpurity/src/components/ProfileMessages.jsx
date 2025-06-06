@@ -46,9 +46,9 @@ const ProfileMessages = ({ currentUser }) => {
 
       const data = await response.json();
       if (data.success) {
-        setConversations(data.data.conversations);
+        setConversations(data.data.conversations || []);
         // Auto-select first conversation if available
-        if (data.data.conversations.length > 0 && !selectedConversation) {
+        if (data.data.conversations?.length > 0 && !selectedConversation) {
           setSelectedConversation(data.data.conversations[0]);
         }
       }
@@ -71,7 +71,7 @@ const ProfileMessages = ({ currentUser }) => {
 
       const data = await response.json();
       if (data.success) {
-        setMessages(data.data.messages);
+        setMessages(data.data.messages || []);
       }
     } catch (error) {
       console.error('Error fetching messages:', error);
@@ -118,21 +118,28 @@ const ProfileMessages = ({ currentUser }) => {
   };
 
   const formatTime = (timestamp) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffInHours = (now - date) / (1000 * 60 * 60);
+    if (!timestamp) return '';
+    
+    try {
+      const date = new Date(timestamp);
+      const now = new Date();
+      const diffInHours = (now - date) / (1000 * 60 * 60);
 
-    if (diffInHours < 24) {
-      return date.toLocaleTimeString('en-US', { 
-        hour: 'numeric', 
-        minute: '2-digit',
-        hour12: true 
-      });
-    } else {
-      return date.toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric' 
-      });
+      if (diffInHours < 24) {
+        return date.toLocaleTimeString('en-US', { 
+          hour: 'numeric', 
+          minute: '2-digit',
+          hour12: true 
+        });
+      } else {
+        return date.toLocaleDateString('en-US', { 
+          month: 'short', 
+          day: 'numeric' 
+        });
+      }
+    } catch (error) {
+      console.error('Error formatting time:', error);
+      return '';
     }
   };
 
@@ -214,10 +221,10 @@ const ProfileMessages = ({ currentUser }) => {
                     onClick={() => setSelectedConversation(conversation)}
                   >
                     <div className={styles.participantAvatar}>
-                      {conversation.participant.profilePicture ? (
+                      {conversation.participant?.profilePicture ? (
                         <img 
                           src={getProfileImageUrl(conversation.participant.profilePicture)}
-                          alt={conversation.participant.name}
+                          alt={conversation.participant?.name || 'User'}
                         />
                       ) : (
                         <span className="material-icons">person</span>
@@ -226,12 +233,12 @@ const ProfileMessages = ({ currentUser }) => {
                     
                     <div className={styles.conversationInfo}>
                       <div className={styles.participantName}>
-                        {conversation.participant.name}
+                        {conversation.participant?.name || 'Unknown User'}
                       </div>
                       {conversation.lastMessage && (
                         <div className={styles.lastMessage}>
-                          {conversation.lastMessage.content.substring(0, 30)}
-                          {conversation.lastMessage.content.length > 30 ? '...' : ''}
+                          {(conversation.lastMessage.content || '').substring(0, 30)}
+                          {(conversation.lastMessage.content || '').length > 30 ? '...' : ''}
                         </div>
                       )}
                     </div>
@@ -251,20 +258,20 @@ const ProfileMessages = ({ currentUser }) => {
                   <div className={styles.chatHeader}>
                     <div className={styles.participantInfo}>
                       <div className={styles.participantAvatar}>
-                        {selectedConversation.participant.profilePicture ? (
+                        {selectedConversation.participant?.profilePicture ? (
                           <img 
                             src={getProfileImageUrl(selectedConversation.participant.profilePicture)}
-                            alt={selectedConversation.participant.name}
+                            alt={selectedConversation.participant?.name || 'User'}
                           />
                         ) : (
                           <span className="material-icons">person</span>
                         )}
                       </div>
-                      <span>{selectedConversation.participant.name}</span>
+                      <span>{selectedConversation.participant?.name || 'Unknown User'}</span>
                     </div>
                     
                     <button 
-                      onClick={() => navigate(`/member/${selectedConversation.participant._id}`)}
+                      onClick={() => navigate(`/member/${selectedConversation.participant?._id}`)}
                       className={styles.viewProfileButton}
                     >
                       <span className="material-icons">person</span>
@@ -276,11 +283,11 @@ const ProfileMessages = ({ currentUser }) => {
                       <div
                         key={message._id}
                         className={`${styles.messageItem} ${
-                          message.sender._id === currentUser?._id ? styles.sent : styles.received
+                          message.sender?._id === currentUser?._id ? styles.sent : styles.received
                         }`}
                       >
                         <div className={styles.messageContent}>
-                          <p>{message.content}</p>
+                          <p>{message.content || ''}</p>
                           {message.verseReference && (
                             <div className={styles.verseReference}>
                               <span className="material-icons">menu_book</span>
@@ -341,10 +348,10 @@ const ProfileMessages = ({ currentUser }) => {
                 }}
               >
                 <div className={styles.participantAvatar}>
-                  {conversation.participant.profilePicture ? (
+                  {conversation.participant?.profilePicture ? (
                     <img 
                       src={getProfileImageUrl(conversation.participant.profilePicture)}
-                      alt={conversation.participant.name}
+                      alt={conversation.participant?.name || 'User'}
                     />
                   ) : (
                     <span className="material-icons">person</span>
@@ -355,11 +362,11 @@ const ProfileMessages = ({ currentUser }) => {
                 </div>
                 <div className={styles.compactInfo}>
                   <div className={styles.participantName}>
-                    {conversation.participant.name}
+                    {conversation.participant?.name || 'Unknown User'}
                   </div>
                   {conversation.lastMessage && (
                     <div className={styles.lastMessage}>
-                      {conversation.lastMessage.content.substring(0, 25)}...
+                      {(conversation.lastMessage.content || '').substring(0, 25)}...
                     </div>
                   )}
                 </div>

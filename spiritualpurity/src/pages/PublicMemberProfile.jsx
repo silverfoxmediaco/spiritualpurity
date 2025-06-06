@@ -455,7 +455,7 @@ const PublicMemberProfile = () => {
                               .map((prayer) => (
                                 <div key={prayer._id} className={`${styles.prayerCard} ${prayer.isAnswered ? styles.answered : ''}`}>
                                   <div className={styles.prayerContent}>
-                                    <p>{prayer.request}</p>
+                                    <p>{prayer.request || ''}</p>
                                     <div className={styles.prayerMeta}>
                                       <span className={styles.prayerDate}>
                                         {new Date(prayer.createdAt).toLocaleDateString()}
@@ -483,7 +483,7 @@ const PublicMemberProfile = () => {
                           ) : (
                             <div className={styles.noPrayers}>
                               <span className="material-icons">volunteer_activism</span>
-                              <p>{member.firstName} hasn't shared any public prayer requests yet</p>
+                              <p>{member?.firstName || 'This member'} hasn't shared any public prayer requests yet</p>
                             </div>
                           )}
                         </div>
