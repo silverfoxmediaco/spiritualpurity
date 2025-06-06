@@ -43,7 +43,6 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use('/uploads', express.static('uploads'));
 
 // Connect to MongoDB
-mongoose.set('strictQuery', false);
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('Connected to MongoDB Atlas');
@@ -107,7 +106,8 @@ const routesToLoad = [
   { path: '/api/auth', file: './routes/auth' },
   { path: '/api/users', file: './routes/users' },
   { path: '/api/messages', file: './routes/messages' },
-  { path: '/api/connections', file: './routes/connections' }, // NEW: Added connections route
+  { path: '/api/connections', file: './routes/connections' },
+  { path: '/api/posts', file: './routes/posts' }, // NEW: Added posts route
   { path: '/api/advertisers', file: './routes/advertisers' }
 ];
 
@@ -115,12 +115,12 @@ routesToLoad.forEach(route => {
   try {
     if (fs.existsSync(route.file + '.js')) {
       app.use(route.path, require(route.file));
-      console.log(`✅ Loaded route: ${route.path}`);
+      console.log(`Loaded route: ${route.path}`);
     } else {
-      console.log(`⚠️  Route file not found: ${route.file}.js`);
+      console.log(`Route file not found: ${route.file}.js`);
     }
   } catch (error) {
-    console.error(`❌ Error loading route ${route.path}:`, error.message);
+    console.error(`Error loading route ${route.path}:`, error.message);
   }
 });
 
@@ -143,7 +143,8 @@ if (process.env.NODE_ENV === 'production') {
         auth: '/api/auth',
         users: '/api/users', 
         messages: '/api/messages',
-        connections: '/api/connections', // NEW: Added to endpoints list
+        connections: '/api/connections',
+        posts: '/api/posts', // NEW: Added to endpoints list
         advertisers: '/api/advertisers'
       }
     });
