@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ProfileMessages from '../components/ProfileMessages';
+import UserPosts from '../components/UserPosts';
 import API_CONFIG from '../config/api';
 import styles from '../styles/MemberProfile.module.css';
 
@@ -389,7 +390,7 @@ const MemberProfile = () => {
               {/* Profile Content */}
               <div className={styles.profileContent}>
                 {isEditing ? (
-                  /* Edit Form */
+                  /* Edit Form - keeping the existing edit form code */
                   <form onSubmit={handleUpdateProfile} className={styles.editForm}>
                     <div className={styles.formGrid}>
                       
@@ -580,6 +581,13 @@ const MemberProfile = () => {
                 ) : (
                   /* View Mode */
                   <div className={styles.profileView}>
+                    
+                    {/* Posts Section - NEW: Added at the top */}
+                    <UserPosts 
+                      userId={user._id} 
+                      isOwnProfile={true} 
+                      currentUser={user} 
+                    />
                     
                     {/* Bio Section */}
                     {user?.bio && (

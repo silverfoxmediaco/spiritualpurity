@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import UserPosts from '../components/UserPosts';
 import API_CONFIG from '../config/api';
 import styles from '../styles/PublicMemberProfile.module.css';
 
@@ -312,6 +313,13 @@ const PublicMemberProfile = () => {
                         <span className="material-icons">fiber_new</span>
                       </div>
                     )}
+
+                    {/* Posts Section */}
+                    <UserPosts 
+                      userId={member._id} 
+                      isOwnProfile={false} 
+                      currentUser={currentUser} 
+                    />
                   </div>
                 </div>
                 
