@@ -1,4 +1,4 @@
-// spiritualpurity-backend/routes/users.js
+// routes/users.js
 
 const express = require('express');
 const User = require('../models/User');
@@ -133,7 +133,7 @@ router.get('/newest-members', async (req, res) => {
     const members = await User.find({ 
       isActive: true 
     })
-    .select('firstName lastName profilePicture bio location relationshipStatus privacy joinDate')
+    .select('firstName lastName profilePicture bio location relationshipStatus privacy joinDate prayerStats')
     .sort({ joinDate: -1 })
     .limit(6);
 
@@ -162,7 +162,8 @@ router.get('/newest-members', async (req, res) => {
         location: memberObj.location,
         relationshipStatus: memberObj.relationshipStatus,
         privacy: memberObj.privacy,
-        joinDate: memberObj.joinDate
+        joinDate: memberObj.joinDate,
+        prayerStats: memberObj.prayerStats
       };
     });
 
@@ -207,7 +208,7 @@ router.get('/personalized-featured', authenticateToken, async (req, res) => {
       _id: { $ne: currentUser._id },
       isActive: true
     })
-    .select('firstName lastName profilePicture bio location interests relationshipStatus privacy joinDate')
+    .select('firstName lastName profilePicture bio location interests relationshipStatus privacy joinDate prayerStats')
     .lean(); // Use lean() for better performance
 
     // Calculate compatibility scores for each user
@@ -234,7 +235,7 @@ router.get('/personalized-featured', authenticateToken, async (req, res) => {
         },
         isActive: true
       })
-      .select('firstName lastName profilePicture bio location relationshipStatus privacy joinDate')
+      .select('firstName lastName profilePicture bio location relationshipStatus privacy joinDate prayerStats')
       .sort({ joinDate: -1 })
       .limit(6 - recommendedUsers.length)
       .lean();
@@ -278,6 +279,7 @@ router.get('/personalized-featured', authenticateToken, async (req, res) => {
         relationshipStatus: memberObj.relationshipStatus,
         interests: memberObj.interests,
         joinDate: memberObj.joinDate,
+        prayerStats: memberObj.prayerStats,
         compatibilityScore: memberObj.compatibilityScore,
         isPersonalized: memberObj.compatibilityScore > 0
       };
@@ -311,7 +313,7 @@ router.get('/all-members', async (req, res) => {
     const members = await User.find({ 
       isActive: true 
     })
-    .select('firstName lastName profilePicture bio location relationshipStatus privacy joinDate')
+    .select('firstName lastName profilePicture bio location relationshipStatus privacy joinDate prayerStats')
     .sort({ joinDate: -1 });
 
     // Apply privacy settings
@@ -337,7 +339,8 @@ router.get('/all-members', async (req, res) => {
         location: memberObj.location,
         relationshipStatus: memberObj.relationshipStatus,
         privacy: memberObj.privacy,
-        joinDate: memberObj.joinDate
+        joinDate: memberObj.joinDate,
+        prayerStats: memberObj.prayerStats
       };
     });
 
@@ -601,7 +604,8 @@ router.post('/prayer-request', authenticateToken, async (req, res) => {
       request: request.trim(),
       isPrivate: isPrivate || false,
       createdAt: new Date(),
-      isAnswered: false
+      isAnswered: false,
+      prayerCount: 0
     });
 
     await user.save();
@@ -668,6 +672,58 @@ router.put('/prayer-request/:id', authenticateToken, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Server error while updating prayer request'
+    });
+  }
+});
+
+// @route   POST /api/users/pray/:userId/:prayerRequestId
+// @desc    Record prayer participation (anonymous count + personal stats)
+// @access  Private
+router.post('/pray/:userId/:prayerRequestId', authenticateToken, async (req, res) => {
+  try {
+    const { userId, prayerRequestId } = req.params;
+    const prayingUser = req.user; // The person praying
+    
+    // Find the user whose prayer we're praying for
+    const userWithPrayer = await User.findById(userId);
+    if (!userWithPrayer) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Increment prayer count on the request (anonymous)
+    const prayerRequest = userWithPrayer.prayerRequests.id(prayerRequestId);
+    if (!prayerRequest) {
+      return res.status(404).json({
+        success: false,
+        message: 'Prayer request not found'
+      });
+    }
+    
+    prayerRequest.prayerCount += 1;
+    await userWithPrayer.save();
+
+    // Increment the praying user's personal stats
+    prayingUser.prayerStats.totalPrayersOffered += 1;
+    prayingUser.prayerStats.lastPrayedAt = new Date();
+    await prayingUser.save();
+
+    res.json({
+      success: true,
+      message: 'Prayer recorded',
+      data: {
+        prayerCount: prayerRequest.prayerCount,
+        yourTotalPrayers: prayingUser.prayerStats.totalPrayersOffered
+      }
+    });
+
+  } catch (error) {
+    console.error('Prayer count error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to record prayer'
     });
   }
 });

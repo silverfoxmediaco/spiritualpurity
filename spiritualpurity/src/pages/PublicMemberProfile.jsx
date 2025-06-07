@@ -175,13 +175,37 @@ const PublicMemberProfile = () => {
     }
   };
 
-  const handleSendPrayer = () => {
+  const handleSendPrayer = async (prayerRequestId) => {
     if (!currentUser) {
       alert('Please log in to pray for members');
       return;
     }
 
-    navigate('/prayer');
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(
+        `${API_CONFIG.BASE_URL}/api/users/pray/${member._id}/${prayerRequestId}`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      const data = await response.json();
+      if (data.success) {
+        alert('🙏 Your prayer has been recorded. Thank you for praying!');
+        // Refresh the member profile to show updated count
+        fetchMemberProfile();
+      } else {
+        alert(data.message || 'Failed to record prayer');
+      }
+    } catch (error) {
+      console.error('Prayer error:', error);
+      alert('Failed to record prayer. Please try again.');
+    }
   };
 
   const formatJoinDate = (dateString) => {
@@ -360,6 +384,14 @@ const PublicMemberProfile = () => {
                       </div>
                     )}
 
+                    {/* Prayer Participation Stats */}
+                    {member?.prayerStats?.totalPrayersOffered > 0 && (
+                      <div className={styles.prayerParticipation}>
+                        <span className="material-icons">volunteer_activism</span>
+                        <span>Prayed {member.prayerStats.totalPrayersOffered} times</span>
+                      </div>
+                    )}
+
                     {/* Mutual Connections */}
                     {mutualConnections > 0 && (
                       <div className={styles.mutualConnections}>
@@ -368,6 +400,23 @@ const PublicMemberProfile = () => {
                       </div>
                     )}
                   </div>
+
+                  {/* Prayer Badges */}
+                  {member?.prayerStats?.totalPrayersOffered >= 10 && (
+                    <div className={styles.spiritualBadges}>
+                      {member.prayerStats.totalPrayersOffered >= 100 && (
+                        <span className={styles.badge}>🕊️ Prayer Intercessor</span>
+                      )}
+                      {member.prayerStats.totalPrayersOffered >= 50 && 
+                       member.prayerStats.totalPrayersOffered < 100 && (
+                        <span className={styles.badge}>⚔️ Prayer Warrior</span>
+                      )}
+                      {member.prayerStats.totalPrayersOffered >= 10 && 
+                       member.prayerStats.totalPrayersOffered < 50 && (
+                        <span className={styles.badge}>🙏 Faithful Prayer</span>
+                      )}
+                    </div>
+                  )}
                 </div>
                 
                 <div className={styles.profileActions}>
@@ -390,7 +439,7 @@ const PublicMemberProfile = () => {
                   </button>
                   
                   <button 
-                    onClick={handleSendPrayer} 
+                    onClick={() => navigate('/prayer')} 
                     className={styles.prayButton}
                   >
                     <span className="material-icons">volunteer_activism</span>
@@ -475,6 +524,12 @@ const PublicMemberProfile = () => {
                                       <span className={styles.prayerDate}>
                                         {new Date(prayer.createdAt).toLocaleDateString()}
                                       </span>
+                                      {prayer.prayerCount > 0 && (
+                                        <span className={styles.prayerCountBadge}>
+                                          <span className="material-icons">people</span>
+                                          {prayer.prayerCount} praying
+                                        </span>
+                                      )}
                                       {prayer.isAnswered && (
                                         <span className={styles.answeredTag}>
                                           <span className="material-icons">check_circle</span>
@@ -487,7 +542,7 @@ const PublicMemberProfile = () => {
                                   {currentUser && !prayer.isAnswered && (
                                     <button 
                                       className={styles.prayForButton}
-                                      onClick={handleSendPrayer}
+                                      onClick={() => handleSendPrayer(prayer._id)}
                                     >
                                       <span className="material-icons">volunteer_activism</span>
                                       Pray for this
@@ -531,9 +586,12 @@ const PublicMemberProfile = () => {
                           {actionLoading.connect ? 'Connecting...' : getConnectionButtonText()}
                         </button>
                         
-                        <button onClick={handleSendPrayer} className={styles.actionButton}>
+                        <button 
+                          onClick={() => navigate('/prayer')} 
+                          className={styles.actionButton}
+                        >
                           <span className="material-icons">volunteer_activism</span>
-                          Pray for {member?.firstName}
+                          Prayer Wall
                         </button>
                         
                         {/* NEW: Share Profile Action */}
@@ -545,14 +603,6 @@ const PublicMemberProfile = () => {
                           size="medium"
                           className={styles.sidebarShareButton}
                         />
-                        
-                        <button 
-                          onClick={() => navigate('/prayer')} 
-                          className={styles.actionButton}
-                        >
-                          <span className="material-icons">forum</span>
-                          Visit Prayer Wall
-                        </button>
                       </div>
                     </div>
 

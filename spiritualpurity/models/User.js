@@ -1,4 +1,4 @@
-// spiritualpurity-backend/models/User.js
+// models/User.js
 
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
@@ -127,8 +127,19 @@ const UserSchema = new mongoose.Schema({
     isAnswered: {
       type: Boolean,
       default: false
+    },
+    // NEW: Track how many people are praying
+    prayerCount: {
+      type: Number,
+      default: 0
     }
   }],
+  
+  // NEW: Prayer participation stats
+  prayerStats: {
+    totalPrayersOffered: { type: Number, default: 0 },
+    lastPrayedAt: { type: Date }
+  },
   
   // Account Settings
   isActive: {
