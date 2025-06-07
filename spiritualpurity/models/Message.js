@@ -1,4 +1,4 @@
-// spiritualpurity-backend/models/Message.js
+// spiritualpurity/models/Message.js
 
 const mongoose = require('mongoose');
 
@@ -16,13 +16,41 @@ const MessageSchema = new mongoose.Schema({
   content: {
     type: String,
     required: true,
-    maxlength: [1000, 'Message cannot exceed 1000 characters'],
+    maxlength: [2000, 'Message cannot exceed 2000 characters'], // Increased for shared content
     trim: true
   },
   messageType: {
     type: String,
-    enum: ['text', 'prayer', 'verse', 'encouragement'],
+    enum: ['text', 'prayer', 'verse', 'encouragement', 'shared'], // Added 'shared' type
     default: 'text'
+  },
+  // NEW: Shared content support
+  sharedContent: {
+    type: {
+      type: String,
+      enum: ['profile', 'post'],
+      required: function() { return this.sharedContent && Object.keys(this.sharedContent).length > 1; }
+    },
+    id: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: function() { return this.sharedContent && this.sharedContent.type; }
+    },
+    title: {
+      type: String,
+      required: function() { return this.sharedContent && this.sharedContent.type; }
+    },
+    description: String,
+    imageUrl: String,
+    url: {
+      type: String,
+      required: function() { return this.sharedContent && this.sharedContent.type; }
+    },
+    // Additional metadata for posts
+    author: {
+      id: mongoose.Schema.Types.ObjectId,
+      name: String,
+      profilePicture: String
+    }
   },
   // For Bible verse messages
   verseReference: {
@@ -69,7 +97,22 @@ const MessageSchema = new mongoose.Schema({
       enum: ['pending', 'approved', 'removed'],
       default: 'approved'
     }
-  }
+  },
+  // NEW: Message reactions (optional future feature)
+  reactions: [{
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    emoji: {
+      type: String,
+      enum: ['❤️', '🙏', '👍', '😊', '🎉', '😢']
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
+  }]
 }, {
   timestamps: true
 });
@@ -77,6 +120,12 @@ const MessageSchema = new mongoose.Schema({
 // Index for efficient querying
 MessageSchema.index({ conversation: 1, createdAt: -1 });
 MessageSchema.index({ sender: 1, createdAt: -1 });
+MessageSchema.index({ 'sharedContent.type': 1, 'sharedContent.id': 1 }); // NEW: Index for shared content
+
+// NEW: Virtual to check if message has shared content
+MessageSchema.virtual('hasSharedContent').get(function() {
+  return this.sharedContent && this.sharedContent.type && this.sharedContent.id;
+});
 
 // Mark message as read by a user
 MessageSchema.methods.markAsRead = async function(userId) {
@@ -122,6 +171,28 @@ MessageSchema.methods.isDeletedFor = function(userId) {
   );
 };
 
+// NEW: Method to add reaction
+MessageSchema.methods.addReaction = function(userId, emoji) {
+  // Remove existing reaction from this user
+  this.reactions = this.reactions.filter(reaction => 
+    reaction.user.toString() !== userId.toString()
+  );
+  
+  // Add new reaction
+  this.reactions.push({
+    user: userId,
+    emoji: emoji,
+    createdAt: new Date()
+  });
+};
+
+// NEW: Method to remove reaction
+MessageSchema.methods.removeReaction = function(userId) {
+  this.reactions = this.reactions.filter(reaction => 
+    reaction.user.toString() !== userId.toString()
+  );
+};
+
 // Get messages for a conversation (excluding deleted ones for the user)
 MessageSchema.statics.getConversationMessages = async function(conversationId, userId, page = 1, limit = 50) {
   try {
@@ -143,9 +214,62 @@ MessageSchema.statics.getConversationMessages = async function(conversationId, u
   }
 };
 
-// Auto-detect verse references in message content
-MessageSchema.pre('save', function(next) {
-  if (this.isModified('content')) {
+// NEW: Static method to get shared content analytics
+MessageSchema.statics.getSharedContentStats = async function(timeframe = 30) {
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - timeframe);
+
+  const stats = await this.aggregate([
+    {
+      $match: {
+        createdAt: { $gte: startDate },
+        'sharedContent.type': { $exists: true }
+      }
+    },
+    {
+      $group: {
+        _id: '$sharedContent.type',
+        count: { $sum: 1 },
+        uniqueItems: { $addToSet: '$sharedContent.id' }
+      }
+    },
+    {
+      $project: {
+        type: '$_id',
+        shareCount: '$count',
+        uniqueItemsShared: { $size: '$uniqueItems' }
+      }
+    }
+  ]);
+
+  return stats;
+};
+
+// Pre-save middleware to validate shared content and auto-detect content types
+MessageSchema.pre('save', async function(next) {
+  // NEW: Validate shared content if present
+  if (this.sharedContent && this.sharedContent.type && this.sharedContent.id) {
+    // Validate that the shared content still exists and is accessible
+    if (this.sharedContent.type === 'profile') {
+      const User = mongoose.model('User');
+      const user = await User.findById(this.sharedContent.id);
+      if (!user || !user.isActive) {
+        return next(new Error('Shared profile is no longer available'));
+      }
+    } else if (this.sharedContent.type === 'post') {
+      const Post = mongoose.model('Post');
+      const post = await Post.findById(this.sharedContent.id);
+      if (!post || !post.isActive || post.reported?.moderationStatus === 'removed') {
+        return next(new Error('Shared post is no longer available'));
+      }
+    }
+    
+    // Set message type to 'shared' if it has shared content
+    this.messageType = 'shared';
+  }
+
+  // Existing functionality: Auto-detect verse references and prayer content
+  if (this.isModified('content') && this.messageType !== 'shared') {
     // Simple verse detection regex (can be enhanced)
     const versePattern = /\b\d*\s*[A-Za-z]+\s+\d+:\d+(?:-\d+)?\b/g;
     const matches = this.content.match(versePattern);

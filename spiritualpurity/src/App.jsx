@@ -1,4 +1,4 @@
-// src/App.js
+// src/App.jsx
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
@@ -9,6 +9,7 @@ import AllMembers from './pages/AllMembers';
 import Community from './pages/Community';
 import Prayer from './pages/Prayer';
 import Resources from './pages/Resources';
+import PostView from './pages/PostView'; // NEW: Import PostView component
 import AdvertiserDashboard from './pages/AdvertiserDashboard';
 import AdvertiserRegistration from './pages/AdvertiserRegistration';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -26,6 +27,7 @@ function App() {
           <Route path="/prayer" element={<Prayer />} />
           <Route path="/resources" element={<Resources />} />
           <Route path="/member/:id" element={<PublicMemberProfile />} />
+          <Route path="/post/:id" element={<PostView />} /> {/* NEW: Route for individual post viewing */}
           <Route path="/advertiser/register" element={<AdvertiserRegistration />} />
           <Route path="/advertiser/dashboard" element={<AdvertiserDashboard />} />
         </Routes>

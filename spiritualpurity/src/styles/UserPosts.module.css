@@ -663,6 +663,45 @@
   .commentSubmit .material-icons {
     font-size: 16px;
   }
+
+  /* Post Header Actions */
+.postHeaderActions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .shareButtonHeader {
+    /* Styles for share button in post header */
+  }
+  
+  .shareButtonAction {
+    /* Styles for share button in engagement actions */
+    color: #6b7280 !important;
+  }
+  
+  .shareButtonAction:hover {
+    color: #374151 !important;
+    background: #f1f5f9 !important;
+  }
+  
+  /* Profile Name Section with Share Button */
+  .profileNameSection {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+  }
+  
+  .profileShareButton {
+    /* Styles for profile share button */
+  }
+  
+  .sidebarShareButton {
+    /* Styles for sidebar share button */
+    width: 100%;
+    justify-content: center;
+  }
   
   /* Responsive Design */
   @media (max-width: 768px) {
@@ -729,6 +768,25 @@
     .commentsSection {
       padding: 12px 16px;
     }
+
+    .postHeaderActions {
+        gap: 4px;
+      }
+      
+      .profileNameSection {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      
+      .profileNameSection h1 {
+        margin: 0;
+      }
+      
+      .shareButtonHeader,
+      .shareButtonAction {
+        font-size: 0.8rem;
+      }
   }
   
   @media (max-width: 480px) {

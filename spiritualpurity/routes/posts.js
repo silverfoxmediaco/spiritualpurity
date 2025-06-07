@@ -321,6 +321,51 @@ router.get('/user/:userId', authenticateToken, async (req, res) => {
   }
 });
 
+// @route   GET /api/posts/:postId/view
+// @desc    Get individual post for sharing/viewing
+// @access  Private
+router.get('/:postId/view', authenticateToken, async (req, res) => {
+  try {
+    const { postId } = req.params;
+
+    const post = await Post.findById(postId)
+      .populate('author', 'firstName lastName profilePicture')
+      .populate('comments.user', 'firstName lastName profilePicture')
+      .populate('comments.replies.user', 'firstName lastName profilePicture')
+      .populate('likes.user', 'firstName lastName');
+    
+    if (!post || !post.isActive || post.reported.moderationStatus === 'removed') {
+      return res.status(404).json({
+        success: false,
+        message: 'Post not found'
+      });
+    }
+
+    // Check if user can view this post
+    const canView = await post.canUserView(req.user._id);
+    if (!canView) {
+      return res.status(403).json({
+        success: false,
+        message: 'You cannot access this post'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        post: post
+      }
+    });
+
+  } catch (error) {
+    console.error('Get individual post error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to load post'
+    });
+  }
+});
+
 // @route   PUT /api/posts/:postId/like
 // @desc    Like/unlike a post
 // @access  Private

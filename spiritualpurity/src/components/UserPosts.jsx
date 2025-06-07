@@ -1,6 +1,7 @@
 // src/components/UserPosts.jsx
 
 import React, { useState, useEffect, useRef } from 'react';
+import ShareButton from './ShareButton';
 import API_CONFIG from '../config/api';
 import styles from '../styles/UserPosts.module.css';
 
@@ -244,6 +245,16 @@ const UserPosts = ({ userId, isOwnProfile = false, currentUser }) => {
     return post.likes.some(like => like.user._id === currentUser?._id);
   };
 
+  // NEW: Create share data for posts
+  const createPostShareData = (post) => {
+    return {
+      id: post._id,
+      title: `Post by ${post.author.firstName} ${post.author.lastName}`,
+      description: post.content || 'Check out this post from our spiritual community',
+      imageUrl: post.media && post.media.length > 0 ? post.media[0].url : getProfileImageUrl(post.author.profilePicture)
+    };
+  };
+
   if (loading) {
     return (
       <div className={styles.postsSection}>
@@ -442,11 +453,23 @@ const UserPosts = ({ userId, isOwnProfile = false, currentUser }) => {
                   </div>
                 </div>
                 
-                {isOwnProfile && (
-                  <div className={styles.postOptions}>
-                    <span className="material-icons">more_vert</span>
-                  </div>
-                )}
+                <div className={styles.postHeaderActions}>
+                  {/* NEW: Share Button for Posts */}
+                  <ShareButton
+                    shareType="post"
+                    shareData={createPostShareData(post)}
+                    currentUser={currentUser}
+                    buttonStyle="icon"
+                    size="small"
+                    className={styles.shareButtonHeader}
+                  />
+                  
+                  {isOwnProfile && (
+                    <div className={styles.postOptions}>
+                      <span className="material-icons">more_vert</span>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Post Content */}
@@ -513,6 +536,17 @@ const UserPosts = ({ userId, isOwnProfile = false, currentUser }) => {
                     <span className="material-icons">comment</span>
                     Comment
                   </button>
+                  
+                  {/* NEW: Share Button in Engagement Actions */}
+                  <ShareButton
+                    shareType="post"
+                    shareData={createPostShareData(post)}
+                    currentUser={currentUser}
+                    buttonStyle="button"
+                    size="small"
+                    className={styles.shareButtonAction}
+                  />
+                  
                   <button className={styles.actionButton}>
                     <span className="material-icons">volunteer_activism</span>
                     Pray

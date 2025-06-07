@@ -1,0 +1,144 @@
+/* src/styles/ShareButton.module.css */
+
+.shareButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    background: none;
+    color: #6b7280;
+  }
+  
+  .shareButton:hover {
+    color: #374151;
+    transform: translateY(-1px);
+  }
+  
+  .shareButton:active {
+    transform: translateY(0);
+  }
+  
+  /* Button Styles */
+  .shareButton.icon {
+    background: none;
+    border: 1px solid transparent;
+    padding: 8px;
+    border-radius: 50%;
+  }
+  
+  .shareButton.icon:hover {
+    background: rgba(107, 114, 128, 0.1);
+    border-color: rgba(107, 114, 128, 0.2);
+  }
+  
+  .shareButton.button {
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    padding: 8px 12px;
+    border-radius: 6px;
+  }
+  
+  .shareButton.button:hover {
+    background: #e5e7eb;
+    border-color: #d1d5db;
+  }
+  
+  .shareButton.text {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    padding: 10px 16px;
+    border-radius: 8px;
+  }
+  
+  .shareButton.text:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  }
+  
+  /* Sizes */
+  .shareButton.small {
+    font-size: 0.8rem;
+  }
+  
+  .shareButton.small .material-icons {
+    font-size: 16px;
+  }
+  
+  .shareButton.small.icon {
+    padding: 6px;
+  }
+  
+  .shareButton.small.button,
+  .shareButton.small.text {
+    padding: 6px 10px;
+  }
+  
+  .shareButton.medium {
+    font-size: 0.9rem;
+  }
+  
+  .shareButton.medium .material-icons {
+    font-size: 18px;
+  }
+  
+  .shareButton.medium.icon {
+    padding: 8px;
+  }
+  
+  .shareButton.medium.button {
+    padding: 8px 12px;
+  }
+  
+  .shareButton.medium.text {
+    padding: 10px 16px;
+  }
+  
+  .shareButton.large {
+    font-size: 1rem;
+  }
+  
+  .shareButton.large .material-icons {
+    font-size: 20px;
+  }
+  
+  .shareButton.large.icon {
+    padding: 10px;
+  }
+  
+  .shareButton.large.button {
+    padding: 10px 16px;
+  }
+  
+  .shareButton.large.text {
+    padding: 12px 20px;
+  }
+  
+  /* Focus states */
+  .shareButton:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+  
+  .shareButton.text:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .shareButton.text {
+      padding: 8px 12px;
+      font-size: 0.85rem;
+    }
+    
+    .shareButton.text .material-icons {
+      font-size: 16px;
+    }
+  }

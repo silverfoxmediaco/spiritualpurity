@@ -5,6 +5,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import UserPosts from '../components/UserPosts';
+import ShareButton from '../components/ShareButton';
 import API_CONFIG from '../config/api';
 import styles from '../styles/PublicMemberProfile.module.css';
 
@@ -52,7 +53,6 @@ const PublicMemberProfile = () => {
 
       if (data.success) {
         setMember(data.data.user);
-        // Fetch connection status after getting member data
         fetchConnectionStatus();
       } else {
         setError(data.message || 'Member not found');
@@ -160,7 +160,6 @@ const PublicMemberProfile = () => {
 
       const data = await response.json();
       if (data.success) {
-        // Redirect to profile with a message to check their messages
         navigate('/profile');
         setTimeout(() => {
           alert(`Conversation started with ${member.firstName}! Check your Messages section below to continue chatting.`);
@@ -182,7 +181,6 @@ const PublicMemberProfile = () => {
       return;
     }
 
-    // Navigate to prayer page
     navigate('/prayer');
   };
 
@@ -224,13 +222,23 @@ const PublicMemberProfile = () => {
   const getProfileImageUrl = (profilePicture) => {
     if (!profilePicture) return null;
     
-    // If it's already a full URL (starts with http), use it as is (Cloudinary URLs)
     if (profilePicture.startsWith('http')) {
       return profilePicture;
     }
     
-    // If it's a relative path, prepend the API base URL
     return `${API_CONFIG.BASE_URL}${profilePicture}`;
+  };
+
+  // NEW: Create share data for profile
+  const createProfileShareData = () => {
+    if (!member) return null;
+    
+    return {
+      id: member._id,
+      title: `${member.firstName} ${member.lastName}`,
+      description: member.bio || `${member.firstName} is a member of our spiritual community`,
+      imageUrl: getProfileImageUrl(member.profilePicture)
+    };
   };
 
   if (loading) {
@@ -286,9 +294,6 @@ const PublicMemberProfile = () => {
       <div className="container">
         <div className="row">
           <div className="col-12">
-            
-
-
             <div className={styles.profileContainer}>
               
               {/* Profile Header */}
@@ -313,20 +318,25 @@ const PublicMemberProfile = () => {
                         <span className="material-icons">fiber_new</span>
                       </div>
                     )}
-
-                    {/* Posts Section */}
-                    <UserPosts 
-                      userId={member._id} 
-                      isOwnProfile={false} 
-                      currentUser={currentUser} 
-                    />
                   </div>
                 </div>
                 
                 <div className={styles.profileInfo}>
-                  <h1 className={styles.memberName}>
-                    {member?.firstName} {member?.lastName}
-                  </h1>
+                  <div className={styles.profileNameSection}>
+                    <h1 className={styles.memberName}>
+                      {member?.firstName} {member?.lastName}
+                    </h1>
+                    
+                    {/* NEW: Share Button for Profile */}
+                    <ShareButton
+                      shareType="profile"
+                      shareData={createProfileShareData()}
+                      currentUser={currentUser}
+                      buttonStyle="icon"
+                      size="medium"
+                      className={styles.profileShareButton}
+                    />
+                  </div>
                   
                   <div className={styles.memberMeta}>
                     <div className={styles.joinInfo}>
@@ -396,6 +406,13 @@ const PublicMemberProfile = () => {
                   {/* Main Content */}
                   <div className="col-lg-8">
                     
+                    {/* Posts Section */}
+                    <UserPosts 
+                      userId={member._id} 
+                      isOwnProfile={false} 
+                      currentUser={currentUser} 
+                    />
+                    
                     {/* Bio Section */}
                     {member?.bio && (
                       <div className={styles.profileSection}>
@@ -446,7 +463,7 @@ const PublicMemberProfile = () => {
                         
                         <div className={styles.prayerRequests}>
                           {member.prayerRequests
-                            .filter(prayer => !prayer.isPrivate) // Only show public prayers
+                            .filter(prayer => !prayer.isPrivate)
                             .length > 0 ? (
                             member.prayerRequests
                               .filter(prayer => !prayer.isPrivate)
@@ -518,6 +535,16 @@ const PublicMemberProfile = () => {
                           <span className="material-icons">volunteer_activism</span>
                           Pray for {member?.firstName}
                         </button>
+                        
+                        {/* NEW: Share Profile Action */}
+                        <ShareButton
+                          shareType="profile"
+                          shareData={createProfileShareData()}
+                          currentUser={currentUser}
+                          buttonStyle="text"
+                          size="medium"
+                          className={styles.sidebarShareButton}
+                        />
                         
                         <button 
                           onClick={() => navigate('/prayer')} 
