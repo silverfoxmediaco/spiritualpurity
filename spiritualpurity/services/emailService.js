@@ -1,4 +1,4 @@
-// spiritualpurity-backend/services/emailService.js
+// spiritualpurity/services/emailService.js
 
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
@@ -144,10 +144,10 @@ const sendVerificationEmail = async (user, verificationToken) => {
               
               <p>Once verified, you'll be able to:</p>
               <ul>
-                <li>🙏 Share and receive prayer requests</li>
-                <li>📖 Join Bible study discussions</li>
-                <li>💝 Connect with fellow believers</li>
-                <li>✨ Share your testimony and faith journey</li>
+                <li>Share and receive prayer requests</li>
+                <li>Join Bible study discussions</li>
+                <li>Connect with fellow believers</li>
+                <li>Share your testimony and faith journey</li>
               </ul>
               
               <p>If you didn't create this account, please ignore this email.</p>

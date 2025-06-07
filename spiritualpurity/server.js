@@ -29,7 +29,7 @@ uploadDirs.forEach(dir => {
 // CORS Configuration - Fixed for production
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://spiritualpurity.onrender.com'] 
+    ? ['https://spiritualpurity.org', 'https://www.spiritualpurity.org'] 
     : ['http://localhost:3000', 'http://127.0.0.1:3000'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
