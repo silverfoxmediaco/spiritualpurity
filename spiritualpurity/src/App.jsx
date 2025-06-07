@@ -13,13 +13,14 @@ import PostView from './pages/PostView';
 import AdvertiserDashboard from './pages/AdvertiserDashboard';
 import AdvertiserRegistration from './pages/AdvertiserRegistration';
 
-// Admin imports
+// Admin Imports
+import AdminRoute from './components/admin/AdminRoute';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminContent from './pages/admin/AdminContent';
 import AdminPrayers from './pages/admin/AdminPrayers';
-import AdminRoute from './components/admin/AdminRoute';
+import AdminMessages from './pages/admin/AdminMessages';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
@@ -38,21 +39,43 @@ function App() {
           <Route path="/resources" element={<Resources />} />
           <Route path="/member/:id" element={<PublicMemberProfile />} />
           <Route path="/post/:id" element={<PostView />} />
-          
-          {/* Advertiser Routes */}
           <Route path="/advertiser/register" element={<AdvertiserRegistration />} />
           <Route path="/advertiser/dashboard" element={<AdvertiserDashboard />} />
-          
+
           {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/*" element={
+          
+          {/* Protected Admin Routes */}
+          <Route path="/admin/dashboard" element={
             <AdminRoute>
-              <Routes>
-                <Route path="dashboard" element={<AdminDashboard />} />
-                <Route path="users" element={<AdminUsers />} />
-                <Route path="content" element={<AdminContent />} />
-                <Route path="prayers" element={<AdminPrayers />} />
-              </Routes>
+              <AdminDashboard />
+            </AdminRoute>
+          } />
+          <Route path="/admin/users" element={
+            <AdminRoute>
+              <AdminUsers />
+            </AdminRoute>
+          } />
+          <Route path="/admin/content" element={
+            <AdminRoute>
+              <AdminContent />
+            </AdminRoute>
+          } />
+          <Route path="/admin/prayers" element={
+            <AdminRoute>
+              <AdminPrayers />
+            </AdminRoute>
+          } />
+          <Route path="/admin/messages" element={
+            <AdminRoute>
+              <AdminMessages />
+            </AdminRoute>
+          } />
+          
+          {/* Redirect /admin to /admin/dashboard */}
+          <Route path="/admin" element={
+            <AdminRoute>
+              <AdminDashboard />
             </AdminRoute>
           } />
         </Routes>

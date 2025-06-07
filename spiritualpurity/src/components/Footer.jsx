@@ -1,11 +1,20 @@
 // src/components/Footer.jsx
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import styles from '../styles/Footer.module.css';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const [user, setUser] = useState(null);
+
+  // Check if user is logged in and their role
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+  }, []);
 
   return (
     <footer className={styles.footer}>
@@ -50,6 +59,15 @@ const Footer = () => {
                 <li><Link to="/resources">Resources</Link></li>
                 <li><Link to="/advertiser/register">Advertise With Us</Link></li>
                 <li><Link to="/advertiser/dashboard">Advertiser Dashboard</Link></li>
+                {/* Admin Link - Only visible to admin/moderator */}
+                {user && (user.role === 'admin' || user.role === 'moderator') && (
+                  <li className={styles.adminLinkItem}>
+                    <Link to="/admin/dashboard" className={styles.adminLink}>
+                      <span className="material-icons">admin_panel_settings</span>
+                      Admin Panel
+                    </Link>
+                  </li>
+                )}
               </ul>
             </div>
 

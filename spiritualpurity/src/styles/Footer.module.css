@@ -313,4 +313,374 @@
     .copyright {
       font-size: 13px;
     }
+  }/* src/styles/Footer.module.css */
+
+.footer {
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  color: white;
+  margin-top: auto;
+}
+
+/* Main Footer Content */
+.footerMain {
+  padding: 60px 0 40px;
+  position: relative;
+}
+
+.footerMain::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+}
+
+/* Brand Section */
+.footerBrand {
+  margin-bottom: 30px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.logoImage {
+  height: auto;
+  width: 300px;
+  object-fit: contain;
+  filter: brightness(1.1) contrast(1.1);
+  transition: all 0.3s ease;
+}
+
+.logoImage:hover {
+  filter: brightness(1.2) contrast(1.2);
+  transform: scale(1.05);
+}
+
+.brandDescription {
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.6;
+  margin-bottom: 25px;
+  font-size: 15px;
+}
+
+/* Social Links */
+.socialLinks {
+  display: flex;
+  gap: 15px;
+}
+
+.socialLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  color: white;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.socialLink:hover {
+  background: #f59e0b;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+  border-color: #f59e0b;
+}
+
+.socialLink i {
+  font-size: 16px;
+}
+
+/* Footer Headings */
+.footerHeading {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 25px;
+  color: #f59e0b;
+  font-family: 'Poppins', sans-serif;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+/* Footer Links */
+.footerLinks {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footerLinks li {
+  margin-bottom: 12px;
+}
+
+.footerLinks a {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  display: inline-block;
+  position: relative;
+}
+
+.footerLinks a:hover {
+  color: #f59e0b;
+  transform: translateX(5px);
+}
+
+.footerLinks a::before {
+  content: '';
+  position: absolute;
+  left: -15px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 1px;
+  background: #f59e0b;
+  transition: width 0.3s ease;
+}
+
+.footerLinks a:hover::before {
+  width: 10px;
+}
+
+/* Admin Link Styles */
+.adminLinkItem {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.adminLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  background: rgba(245, 158, 11, 0.15);
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  transition: all 0.3s ease;
+}
+
+.adminLink:hover {
+  color: white;
+  background: rgba(245, 158, 11, 0.25);
+  border-color: rgba(245, 158, 11, 0.5);
+  transform: translateX(5px);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+}
+
+.adminLink:hover::before {
+  width: 0;
+}
+
+.adminLink .material-icons {
+  font-size: 18px;
+  color: #f59e0b;
+}
+
+/* Bible Verse */
+.bibleVerse {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+  position: relative;
+}
+
+.verseText {
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.verseReference {
+  color: #f59e0b;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+/* Footer Bottom */
+.footerBottom {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 25px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.copyright {
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  font-size: 14px;
+}
+
+.legalLinks {
+  display: flex;
+  justify-content: flex-end;
+  gap: 25px;
+}
+
+.legalLinks a {
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.legalLinks a:hover {
+  color: #f59e0b;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .footerMain {
+    padding: 40px 0 30px;
   }
+  
+  .logo {
+    justify-content: center;
+    margin-bottom: 15px;
+  }
+  
+  .logoText {
+    font-size: 20px;
+  }
+  
+  .brandDescription {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .socialLinks {
+    justify-content: center;
+    margin-bottom: 30px;
+  }
+  
+  .footerHeading {
+    text-align: center;
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+  
+  .footerLinks {
+    text-align: center;
+  }
+  
+  .footerLinks a::before {
+    display: none;
+  }
+  
+  .footerLinks a:hover {
+    transform: none;
+  }
+
+  .adminLinkItem {
+    text-align: center;
+    margin-top: 15px;
+    padding-top: 15px;
+  }
+
+  .adminLink {
+    display: inline-flex;
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  .adminLink .material-icons {
+    font-size: 16px;
+  }
+  
+  .bibleVerse {
+    margin-top: 20px;
+  }
+  
+  .footerBottom {
+    text-align: center;
+  }
+  
+  .legalLinks {
+    justify-content: center;
+    margin-top: 15px;
+    flex-wrap: wrap;
+  }
+  
+  .copyright {
+    text-align: center;
+  }
+}
+
+@media (max-width: 576px) {
+  .footerMain {
+    padding: 30px 0 20px;
+  }
+  
+  .logoIcon {
+    font-size: 28px;
+  }
+  
+  .logoText {
+    font-size: 18px;
+  }
+  
+  .socialLink {
+    width: 35px;
+    height: 35px;
+  }
+  
+  .socialLink i {
+    font-size: 14px;
+  }
+  
+  .footerHeading {
+    font-size: 15px;
+  }
+  
+  .footerLinks a {
+    font-size: 13px;
+  }
+  
+  .emailInput {
+    padding: 10px 15px;
+    font-size: 13px;
+  }
+  
+  .subscribeBtn {
+    padding: 10px 14px;
+    border-radius: 12px;
+  }
+  
+  .bibleVerse {
+    padding: 15px;
+  }
+  
+  .verseText {
+    font-size: 14px;
+  }
+  
+  .verseReference {
+    font-size: 13px;
+  }
+  
+  .legalLinks {
+    gap: 15px;
+  }
+  
+  .legalLinks a,
+  .copyright {
+    font-size: 13px;
+  }
+}
