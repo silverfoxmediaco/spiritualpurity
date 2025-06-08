@@ -666,6 +666,13 @@ const MemberProfile = () => {
                         Connections ({connections.length})
                       </button>
                       <button 
+                        className={`${styles.tabButton} ${activeTab === 'messages' ? styles.activeTab : ''}`}
+                        onClick={() => setActiveTab('messages')}
+                      >
+                        <span className="material-icons">message</span>
+                        Messages
+                      </button>
+                      <button 
                         className={`${styles.tabButton} ${activeTab === 'about' ? styles.activeTab : ''}`}
                         onClick={() => setActiveTab('about')}
                       >
@@ -767,6 +774,12 @@ const MemberProfile = () => {
                       </div>
                     )}
 
+                    {activeTab === 'messages' && (
+                      <div className={styles.messagesSection}>
+                        <ProfileMessages currentUser={user} />
+                      </div>
+                    )}
+
                     {activeTab === 'about' && (
                       <div>
                         {/* Bio Section */}
@@ -862,9 +875,6 @@ const MemberProfile = () => {
                             )}
                           </div>
                         </div>
-
-                        {/* Messages Section */}
-                        <ProfileMessages currentUser={user} />
                       </div>
                     )}
 

@@ -771,6 +771,11 @@
   font-size: 16px;
 }
 
+/* Messages Section */
+.messagesSection {
+  margin-top: 2rem;
+}
+
 /* Responsive Design - Including Header Width Fix */
 @media (max-width: 768px) {
   .profileTabs {
@@ -787,6 +792,16 @@
 
   .tabButton .material-icons {
     font-size: 18px;
+  }
+
+  /* Hide tab text on mobile - only show icons */
+  .tabButton {
+    font-size: 0;
+  }
+
+  .tabButton .material-icons {
+    font-size: 20px;
+    margin: 0;
   }
 
   .connectionsGrid {
