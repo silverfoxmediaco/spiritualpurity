@@ -65,22 +65,26 @@ const AdminDashboard = () => {
         }
       }
 
-      // TODO: Fetch real recent activity when endpoint is ready
-      // const activityResponse = await fetch(`${API_CONFIG.BASE_URL}/api/admin/dashboard/recent-activity`, {
-      //   headers: {
-      //     'Authorization': `Bearer ${token}`,
-      //     'Content-Type': 'application/json',
-      //   },
-      // });
-      // if (activityResponse.ok) {
-      //   const activityData = await activityResponse.json();
-      //   if (activityData.success) {
-      //     setRecentActivity(activityData.data.activities);
-      //   }
-      // }
-
-      // For now, set empty array for recent activity
-      setRecentActivity([]);
+      // Fetch recent activity (optional - only if you created the activity route)
+      try {
+        const activityResponse = await fetch(`${API_CONFIG.BASE_URL}/api/activity/dashboard/recent-activity`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (activityResponse.ok) {
+          const activityData = await activityResponse.json();
+          if (activityData.success) {
+            setRecentActivity(activityData.data.activities);
+          }
+        }
+      } catch (activityError) {
+        // If activity endpoint doesn't exist, just continue without it
+        console.log('Activity endpoint not available');
+        setRecentActivity([]);
+      }
 
     } catch (error) {
       console.error('Dashboard data error:', error);

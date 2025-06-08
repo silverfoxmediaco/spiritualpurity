@@ -24,27 +24,33 @@ const AdminPrayers = () => {
 
   useEffect(() => {
     fetchPrayers();
-    fetchPrayerStats();
   }, [activeTab, filterCategory, sortBy]);
 
   const fetchPrayers = async () => {
     setLoading(true);
     try {
-      // TODO: Replace with actual API call when endpoint is ready
-      // const token = localStorage.getItem('token');
-      // const response = await fetch(`${API_CONFIG.BASE_URL}/api/admin/prayers`, {
-      //   headers: {
-      //     'Authorization': `Bearer ${token}`,
-      //     'Content-Type': 'application/json',
-      //   },
-      // });
-      // const data = await response.json();
-      // if (data.success) {
-      //   setPrayers(data.data.prayers);
-      // }
+      const token = localStorage.getItem('token');
+      const queryParams = new URLSearchParams({
+        category: filterCategory,
+        status: activeTab === 'all' ? '' : activeTab,
+        sort: sortBy,
+        search: searchTerm
+      });
 
-      // For now, set empty array
-      setPrayers([]);
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/admin/prayers?${queryParams}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setPrayers(data.data.prayers);
+        setStats(data.data.stats);
+      }
+
     } catch (error) {
       console.error('Error fetching prayers:', error);
     } finally {
@@ -52,56 +58,82 @@ const AdminPrayers = () => {
     }
   };
 
-  const fetchPrayerStats = async () => {
-    try {
-      // TODO: Replace with actual API call when endpoint is ready
-      setStats({
-        totalPrayers: 0,
-        activePrayers: 0,
-        answeredPrayers: 0,
-        privatePrayers: 0,
-        todaysPrayers: 0,
-        prayersOffered: 0
-      });
-    } catch (error) {
-      console.error('Error fetching prayer stats:', error);
-    }
-  };
-
-  const handleMarkAnswered = async (prayerId) => {
+  const handleMarkAnswered = async (prayerId, userId) => {
     try {
       const token = localStorage.getItem('token');
-      // API call to mark prayer as answered
-      alert('Prayer marked as answered!');
-      fetchPrayers();
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/admin/prayers/${userId}/${prayerId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action: 'markAnswered' }),
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        alert('Prayer marked as answered!');
+        fetchPrayers();
+      } else {
+        alert(data.message || 'Failed to update prayer');
+      }
     } catch (error) {
       console.error('Error marking prayer as answered:', error);
+      alert('Failed to update prayer request');
     }
   };
 
-  const handleDeletePrayer = async (prayerId) => {
+  const handleDeletePrayer = async (prayerId, userId) => {
     if (!window.confirm('Are you sure you want to delete this prayer request?')) {
       return;
     }
 
     try {
       const token = localStorage.getItem('token');
-      // API call to delete prayer
-      alert('Prayer request deleted!');
-      setPrayers(prayers.filter(p => p._id !== prayerId));
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/admin/prayers/${userId}/${prayerId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action: 'delete' }),
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        alert('Prayer request deleted!');
+        setPrayers(prayers.filter(p => p._id !== prayerId));
+      } else {
+        alert(data.message || 'Failed to delete prayer');
+      }
     } catch (error) {
       console.error('Error deleting prayer:', error);
+      alert('Failed to delete prayer request');
     }
   };
 
-  const handleTogglePrivacy = async (prayerId, currentPrivacy) => {
+  const handleTogglePrivacy = async (prayerId, userId, currentPrivacy) => {
     try {
       const token = localStorage.getItem('token');
-      // API call to toggle privacy
-      alert(`Prayer ${currentPrivacy ? 'made public' : 'made private'}!`);
-      fetchPrayers();
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/admin/prayers/${userId}/${prayerId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action: 'togglePrivacy' }),
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        alert(`Prayer ${currentPrivacy ? 'made public' : 'made private'}!`);
+        fetchPrayers();
+      } else {
+        alert(data.message || 'Failed to update privacy');
+      }
     } catch (error) {
       console.error('Error toggling privacy:', error);
+      alert('Failed to update prayer privacy');
     }
   };
 
@@ -296,7 +328,88 @@ const AdminPrayers = () => {
           <div className={styles.prayersList}>
             {prayers.map((prayer) => (
               <div key={prayer._id} className={styles.prayerCard}>
-                {/* Prayer card content remains the same */}
+                <div className={styles.prayerHeader}>
+                  <div className={styles.prayerUser}>
+                    <div className={styles.userAvatar}>
+                      {prayer.user.profilePicture ? (
+                        <img src={prayer.user.profilePicture} alt="" />
+                      ) : (
+                        <span className="material-icons">person</span>
+                      )}
+                    </div>
+                    <div className={styles.userInfo}>
+                      <h4>{prayer.user.firstName} {prayer.user.lastName}</h4>
+                      <p>{prayer.user.email}</p>
+                    </div>
+                  </div>
+                  <div className={styles.prayerMeta}>
+                    <span 
+                      className={styles.categoryBadge} 
+                      style={{ backgroundColor: getCategoryColor(prayer.category) }}
+                    >
+                      {prayer.category}
+                    </span>
+                    {prayer.isPrivate && (
+                      <span className={styles.privateBadge}>
+                        <span className="material-icons">lock</span>
+                        Private
+                      </span>
+                    )}
+                    {prayer.isAnswered && (
+                      <span className={styles.answeredBadge}>
+                        <span className="material-icons">check_circle</span>
+                        Answered
+                      </span>
+                    )}
+                  </div>
+                </div>
+                
+                <div className={styles.prayerContent}>
+                  <p>{prayer.request}</p>
+                  <div className={styles.prayerStats}>
+                    <span>{formatDate(prayer.createdAt)}</span>
+                    <span>
+                      <span className="material-icons">favorite</span>
+                      {prayer.prayerCount} prayers
+                    </span>
+                  </div>
+                </div>
+                
+                <div className={styles.prayerActions}>
+                  <button
+                    onClick={() => navigate(`/member/${prayer.user._id}`)}
+                    className={styles.actionButton}
+                  >
+                    <span className="material-icons">person</span>
+                    View Profile
+                  </button>
+                  
+                  {!prayer.isAnswered && (
+                    <button
+                      onClick={() => handleMarkAnswered(prayer._id, prayer.userId)}
+                      className={styles.actionButton}
+                    >
+                      <span className="material-icons">check_circle</span>
+                      Mark Answered
+                    </button>
+                  )}
+                  
+                  <button
+                    onClick={() => handleTogglePrivacy(prayer._id, prayer.userId, prayer.isPrivate)}
+                    className={styles.actionButton}
+                  >
+                    <span className="material-icons">{prayer.isPrivate ? 'lock_open' : 'lock'}</span>
+                    {prayer.isPrivate ? 'Make Public' : 'Make Private'}
+                  </button>
+                  
+                  <button
+                    onClick={() => handleDeletePrayer(prayer._id, prayer.userId)}
+                    className={`${styles.actionButton} ${styles.danger}`}
+                  >
+                    <span className="material-icons">delete</span>
+                    Delete
+                  </button>
+                </div>
               </div>
             ))}
           </div>

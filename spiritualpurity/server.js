@@ -109,7 +109,9 @@ const routesToLoad = [
   { path: '/api/users', file: './routes/users' },
   { path: '/api/messages', file: './routes/messages' },
   { path: '/api/connections', file: './routes/connections' },
-  { path: '/api/posts', file: './routes/posts' }, // NEW: Added posts route
+  { path: '/api/posts', file: './routes/posts' },
+  { path: '/api/prayers', file: './routes/prayers' },
+  { path: '/api/admin', file: './routes/admin' }, 
   { path: '/api/advertisers', file: './routes/advertisers' }
 ];
 

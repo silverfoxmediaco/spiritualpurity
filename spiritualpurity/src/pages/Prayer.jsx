@@ -38,17 +38,13 @@ const Prayer = () => {
 
   const fetchPrayerRequests = async () => {
     try {
-      // TODO: Replace with actual API call when endpoint is ready
-      // const response = await fetch(`${API_CONFIG.BASE_URL}/api/prayers/community-requests`);
-      // const data = await response.json();
-      // if (data.success) {
-      //   setPrayerRequests(data.data.activePrayers);
-      //   setAnsweredPrayers(data.data.answeredPrayers);
-      // }
       
-      // For now, set empty arrays
-      setPrayerRequests([]);
-      setAnsweredPrayers([]);
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/prayers/community-requests`);
+      const data = await response.json();
+      if (data.success) {
+      setPrayerRequests(data.data.activePrayers);
+      setAnsweredPrayers(data.data.answeredPrayers);
+      }
       
     } catch (error) {
       console.error('Error fetching prayer requests:', error);
@@ -72,19 +68,19 @@ const Prayer = () => {
 
     setSubmitting(true);
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch(`${API_CONFIG.BASE_URL}/api/prayers/submit`, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Authorization': `Bearer ${localStorage.getItem('token')}`,
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({
-      //     request: newPrayerRequest,
-      //     category: selectedCategory || 'Other',
-      //     isPrivate
-      //   }),
-      // });
+
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/prayers/submit`, {
+      method: 'POST',
+      headers: {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+      request: newPrayerRequest,
+      category: selectedCategory || 'Other',
+      isPrivate
+      }),
+      });
       
       alert('Prayer request functionality will be available soon!');
       

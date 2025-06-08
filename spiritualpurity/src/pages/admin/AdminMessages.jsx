@@ -11,9 +11,10 @@ const AdminMessages = () => {
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [messagesLoading, setMessagesLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('');
+  const [page, setPage] = useState(1);
   const [stats, setStats] = useState({
     totalConversations: 0,
     activeConversations: 0,
@@ -25,8 +26,7 @@ const AdminMessages = () => {
 
   useEffect(() => {
     fetchConversations();
-    fetchMessageStats();
-  }, [activeTab, filterStatus]);
+  }, [activeTab, searchTerm, page]);
 
   useEffect(() => {
     if (selectedConversation) {
@@ -37,21 +37,39 @@ const AdminMessages = () => {
   const fetchConversations = async () => {
     setLoading(true);
     try {
-      // TODO: Replace with actual API call when endpoint is ready
-      // const token = localStorage.getItem('token');
-      // const response = await fetch(`${API_CONFIG.BASE_URL}/api/admin/conversations`, {
-      //   headers: {
-      //     'Authorization': `Bearer ${token}`,
-      //     'Content-Type': 'application/json',
-      //   },
-      // });
-      // const data = await response.json();
-      // if (data.success) {
-      //   setConversations(data.data.conversations);
-      // }
+      const token = localStorage.getItem('token');
+      const queryParams = new URLSearchParams({
+        status: activeTab,
+        search: searchTerm,
+        page: page,
+        limit: 50
+      });
 
-      // For now, set empty array
-      setConversations([]);
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/admin/conversations?${queryParams}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setConversations(data.data.conversations);
+        
+        // Calculate stats from conversations
+        const totalConversations = data.data.pagination.total;
+        const activeConversations = data.data.conversations.filter(c => c.status === 'active').length;
+        const reportedMessages = data.data.conversations.reduce((sum, c) => sum + c.reportCount, 0);
+        
+        setStats(prev => ({
+          ...prev,
+          totalConversations,
+          activeConversations,
+          reportedMessages
+        }));
+      }
+
     } catch (error) {
       console.error('Error fetching conversations:', error);
     } finally {
@@ -60,40 +78,26 @@ const AdminMessages = () => {
   };
 
   const fetchMessages = async (conversationId) => {
+    setMessagesLoading(true);
     try {
-      // TODO: Replace with actual API call when endpoint is ready
-      // const token = localStorage.getItem('token');
-      // const response = await fetch(`${API_CONFIG.BASE_URL}/api/admin/messages/${conversationId}`, {
-      //   headers: {
-      //     'Authorization': `Bearer ${token}`,
-      //     'Content-Type': 'application/json',
-      //   },
-      // });
-      // const data = await response.json();
-      // if (data.success) {
-      //   setMessages(data.data.messages);
-      // }
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/admin/messages/${conversationId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setMessages(data.data.messages);
+      }
 
-      // For now, set empty array
-      setMessages([]);
     } catch (error) {
       console.error('Error fetching messages:', error);
-    }
-  };
-
-  const fetchMessageStats = async () => {
-    try {
-      // TODO: Replace with actual API call when endpoint is ready
-      setStats({
-        totalConversations: 0,
-        activeConversations: 0,
-        reportedMessages: 0,
-        flaggedUsers: 0,
-        messagesThisWeek: 0,
-        averageResponseTime: '0 hours'
-      });
-    } catch (error) {
-      console.error('Error fetching message stats:', error);
+    } finally {
+      setMessagesLoading(false);
     }
   };
 
@@ -103,11 +107,26 @@ const AdminMessages = () => {
     }
 
     try {
-      // API call to delete message
-      alert('Message deleted!');
-      setMessages(messages.filter(m => m._id !== messageId));
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/admin/messages/${messageId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ reason: 'Admin deletion' }),
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        alert('Message deleted!');
+        setMessages(messages.filter(m => m._id !== messageId));
+      } else {
+        alert(data.message || 'Failed to delete message');
+      }
     } catch (error) {
       console.error('Error deleting message:', error);
+      alert('Failed to delete message');
     }
   };
 
@@ -117,25 +136,55 @@ const AdminMessages = () => {
     }
 
     try {
-      // API call to block conversation
-      alert('Conversation blocked!');
-      fetchConversations();
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/admin/conversations/${conversationId}/block`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ reason: 'Admin blocked' }),
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        alert('Conversation blocked!');
+        setSelectedConversation(null);
+        fetchConversations();
+      } else {
+        alert(data.message || 'Failed to block conversation');
+      }
     } catch (error) {
       console.error('Error blocking conversation:', error);
+      alert('Failed to block conversation');
     }
   };
 
   const handleArchiveConversation = async (conversationId) => {
     try {
-      // API call to archive conversation
-      alert('Conversation archived!');
-      fetchConversations();
+      const token = localStorage.getItem('token');
+      // Since archive isn't implemented in backend, we'll use the block endpoint
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/admin/conversations/${conversationId}/archive`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        alert('Conversation archived!');
+        fetchConversations();
+      }
     } catch (error) {
       console.error('Error archiving conversation:', error);
+      alert('Archive functionality not yet implemented');
     }
   };
 
   const formatDate = (dateString) => {
+    if (!dateString) return '';
+    
     const date = new Date(dateString);
     const now = new Date();
     const diffInHours = (now - date) / (1000 * 60 * 60);
@@ -154,6 +203,31 @@ const AdminMessages = () => {
       });
     }
   };
+
+  // Filter conversations based on search term
+  const filteredConversations = conversations.filter(conv => {
+    if (!searchTerm) return true;
+    
+    const searchLower = searchTerm.toLowerCase();
+    return conv.participants.some(p => 
+      `${p.firstName} ${p.lastName}`.toLowerCase().includes(searchLower) ||
+      p.email.toLowerCase().includes(searchLower)
+    );
+  });
+
+  // Filter by tab status
+  const tabFilteredConversations = filteredConversations.filter(conv => {
+    switch(activeTab) {
+      case 'active':
+        return conv.status === 'active';
+      case 'reported':
+        return conv.hasReportedMessages;
+      case 'archived':
+        return conv.status === 'inactive';
+      default:
+        return true;
+    }
+  });
 
   return (
     <div className={styles.adminPage}>
@@ -266,13 +340,13 @@ const AdminMessages = () => {
                 <div className={styles.spinner}></div>
                 <p>Loading conversations...</p>
               </div>
-            ) : conversations.length === 0 ? (
+            ) : tabFilteredConversations.length === 0 ? (
               <div className={styles.emptyState}>
                 <span className="material-icons">chat_bubble_outline</span>
                 <p>No conversations found</p>
               </div>
             ) : (
-              conversations.map((conversation) => (
+              tabFilteredConversations.map((conversation) => (
                 <div
                   key={conversation._id}
                   className={`${styles.conversationItem} ${
@@ -290,9 +364,9 @@ const AdminMessages = () => {
                   </div>
                   
                   <div className={styles.conversationPreview}>
-                    <p>{conversation.lastMessage.content}</p>
+                    <p>{conversation.lastMessage?.content || 'No messages'}</p>
                     <div className={styles.conversationMeta}>
-                      <span>{formatDate(conversation.lastMessage.createdAt)}</span>
+                      <span>{formatDate(conversation.lastActivity)}</span>
                       <span>{conversation.messageCount} messages</span>
                       {conversation.hasReportedMessages && (
                         <span className={styles.reportBadge}>
@@ -344,7 +418,12 @@ const AdminMessages = () => {
               </div>
 
               <div className={styles.messagesContent}>
-                {messages.length === 0 ? (
+                {messagesLoading ? (
+                  <div className={styles.loadingState}>
+                    <div className={styles.spinner}></div>
+                    <p>Loading messages...</p>
+                  </div>
+                ) : messages.length === 0 ? (
                   <div className={styles.emptyState}>
                     <p>No messages to display</p>
                   </div>
@@ -352,7 +431,7 @@ const AdminMessages = () => {
                   messages.map((message) => (
                     <div 
                       key={message._id}
-                      className={`${styles.messageItem} ${message.isReported ? styles.reported : ''}`}
+                      className={`${styles.messageItem} ${message.reported?.isReported ? styles.reported : ''}`}
                     >
                       <div className={styles.messageHeader}>
                         <strong>{message.sender.firstName} {message.sender.lastName}</strong>
@@ -360,6 +439,17 @@ const AdminMessages = () => {
                       </div>
                       <div className={styles.messageBody}>
                         <p>{message.content}</p>
+                        {message.messageType && message.messageType !== 'text' && (
+                          <span className={styles.messageType}>
+                            <span className="material-icons">
+                              {message.messageType === 'prayer' ? 'volunteer_activism' : 
+                               message.messageType === 'verse' ? 'menu_book' : 
+                               message.messageType === 'encouragement' ? 'favorite' : 
+                               'chat'}
+                            </span>
+                            {message.messageType}
+                          </span>
+                        )}
                       </div>
                       <div className={styles.messageActions}>
                         <button

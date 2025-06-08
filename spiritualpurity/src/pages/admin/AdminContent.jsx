@@ -24,30 +24,33 @@ const AdminContent = () => {
   const fetchContent = async () => {
     setLoading(true);
     try {
-      // TODO: Replace with actual API calls when endpoints are ready
-      // const token = localStorage.getItem('token');
-      // const response = await fetch(`${API_CONFIG.BASE_URL}/api/admin/content/${activeTab}`, {
-      //   headers: {
-      //     'Authorization': `Bearer ${token}`,
-      //     'Content-Type': 'application/json',
-      //   },
-      // });
-      // const data = await response.json();
-      // if (data.success) {
-      //   setContent(data.data.content);
-      //   setStats(data.data.stats);
-      // }
-
-      // For now, set empty array
-      setContent([]);
-      
-      // Update stats to zeros
-      setStats({
-        totalPosts: 0,
-        pendingReview: 0,
-        reportedContent: 0,
-        flaggedMessages: 0
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/admin/content/${activeTab}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
       });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setContent(data.data.content);
+        
+        // Calculate stats based on content
+        const reportedCount = data.data.content.filter(item => 
+          item.reported?.isReported || item.type === 'reported'
+        ).length;
+        
+        setStats({
+          totalPosts: data.data.pagination?.total || data.data.content.length,
+          pendingReview: data.data.content.filter(item => 
+            item.reported?.moderationStatus === 'pending'
+          ).length,
+          reportedContent: reportedCount,
+          flaggedMessages: 0 // This would come from messages endpoint
+        });
+      }
 
     } catch (error) {
       console.error('Error fetching content:', error);
@@ -56,40 +59,112 @@ const AdminContent = () => {
     }
   };
 
-  const handleApprove = async (contentId) => {
+  const handleApprove = async (contentId, contentType) => {
     try {
-      // API call to approve content
-      alert('Content approved!');
-      setContent(content.filter(item => item._id !== contentId));
+      const token = localStorage.getItem('token');
+      
+      // Different endpoints for different content types
+      let endpoint = '';
+      if (contentType === 'post') {
+        endpoint = `${API_CONFIG.BASE_URL}/api/posts/${contentId}/approve`;
+      } else if (contentType === 'comment') {
+        endpoint = `${API_CONFIG.BASE_URL}/api/posts/comment/${contentId}/approve`;
+      }
+      
+      const response = await fetch(endpoint, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          moderationStatus: 'approved',
+          moderatedBy: JSON.parse(localStorage.getItem('user'))._id 
+        }),
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        alert('Content approved!');
+        setContent(content.filter(item => item._id !== contentId));
+      }
     } catch (error) {
       console.error('Error approving content:', error);
+      alert('Failed to approve content');
     }
   };
 
-  const handleReject = async (contentId) => {
+  const handleReject = async (contentId, contentType) => {
     const reason = prompt('Please provide a reason for rejection:');
     if (!reason) return;
 
     try {
-      // API call to reject content
-      alert('Content rejected!');
-      setContent(content.filter(item => item._id !== contentId));
+      const token = localStorage.getItem('token');
+      
+      let endpoint = '';
+      if (contentType === 'post') {
+        endpoint = `${API_CONFIG.BASE_URL}/api/posts/${contentId}/reject`;
+      } else if (contentType === 'comment') {
+        endpoint = `${API_CONFIG.BASE_URL}/api/posts/comment/${contentId}/reject`;
+      }
+      
+      const response = await fetch(endpoint, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          moderationStatus: 'removed',
+          reason: reason,
+          moderatedBy: JSON.parse(localStorage.getItem('user'))._id 
+        }),
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        alert('Content rejected!');
+        setContent(content.filter(item => item._id !== contentId));
+      }
     } catch (error) {
       console.error('Error rejecting content:', error);
+      alert('Failed to reject content');
     }
   };
 
-  const handleDelete = async (contentId) => {
+  const handleDelete = async (contentId, contentType) => {
     if (!window.confirm('Are you sure you want to delete this content? This action cannot be undone.')) {
       return;
     }
 
     try {
-      // API call to delete content
-      alert('Content deleted!');
-      setContent(content.filter(item => item._id !== contentId));
+      const token = localStorage.getItem('token');
+      
+      let endpoint = '';
+      if (contentType === 'post') {
+        endpoint = `${API_CONFIG.BASE_URL}/api/posts/${contentId}`;
+      } else if (contentType === 'comment') {
+        endpoint = `${API_CONFIG.BASE_URL}/api/posts/comment/${contentId}`;
+      } else if (contentType === 'message') {
+        endpoint = `${API_CONFIG.BASE_URL}/api/admin/messages/${contentId}`;
+      }
+      
+      const response = await fetch(endpoint, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        alert('Content deleted!');
+        setContent(content.filter(item => item._id !== contentId));
+      }
     } catch (error) {
       console.error('Error deleting content:', error);
+      alert('Failed to delete content');
     }
   };
 
@@ -101,6 +176,16 @@ const AdminContent = () => {
     if (hours < 1) return 'Just now';
     if (hours < 24) return `${hours} hours ago`;
     return new Date(date).toLocaleDateString();
+  };
+
+  const getContentTypeIcon = (type) => {
+    switch(type) {
+      case 'post': return 'article';
+      case 'comment': return 'comment';
+      case 'testimony': return 'auto_stories';
+      case 'message': return 'message';
+      default: return 'description';
+    }
   };
 
   return (
@@ -175,9 +260,129 @@ const AdminContent = () => {
             {content.map((item) => (
               <div 
                 key={item._id} 
-                className={`${styles.contentCard} ${item.reported ? styles.reported : ''}`}
+                className={`${styles.contentCard} ${item.reported?.isReported ? styles.reported : ''}`}
               >
-                {/* Content card structure remains the same */}
+                <div className={styles.contentHeader}>
+                  <div className={styles.contentType}>
+                    <span className="material-icons">{getContentTypeIcon(item.type)}</span>
+                    <span>{item.type}</span>
+                  </div>
+                  <div className={styles.contentMeta}>
+                    <span>{formatTime(item.createdAt)}</span>
+                    {item.reported?.isReported && (
+                      <span className={styles.reportBadge}>
+                        <span className="material-icons">flag</span>
+                        {item.reported.reportedBy?.length || 1} report(s)
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className={styles.contentBody}>
+                  <div className={styles.authorInfo}>
+                    <div className={styles.authorAvatar}>
+                      {item.author?.profilePicture ? (
+                        <img src={item.author.profilePicture} alt="" />
+                      ) : (
+                        <span className="material-icons">person</span>
+                      )}
+                    </div>
+                    <div className={styles.authorDetails}>
+                      <h4>{item.author?.firstName} {item.author?.lastName}</h4>
+                      <p>{item.author?.email}</p>
+                    </div>
+                  </div>
+
+                  <div className={styles.contentText}>
+                    <p>{item.content}</p>
+                    
+                    {/* Show media if it's a post */}
+                    {item.media && item.media.length > 0 && (
+                      <div className={styles.contentMedia}>
+                        {item.media.map((media, index) => (
+                          <div key={index} className={styles.mediaItem}>
+                            {media.type === 'image' ? (
+                              <img src={media.url} alt="" />
+                            ) : (
+                              <video controls>
+                                <source src={media.url} type="video/mp4" />
+                              </video>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Show post title for comments */}
+                    {item.type === 'comment' && item.postTitle && (
+                      <div className={styles.parentPost}>
+                        <span className="material-icons">reply</span>
+                        Comment on: {item.postTitle}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Show report reasons if reported */}
+                  {item.reported?.isReported && item.reported.reportedBy && (
+                    <div className={styles.reportReasons}>
+                      <h5>Report Reasons:</h5>
+                      {item.reported.reportedBy.map((report, index) => (
+                        <div key={index} className={styles.reportItem}>
+                          <span className="material-icons">report</span>
+                          <span>{report.reason}</span>
+                          {report.description && <p>{report.description}</p>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className={styles.contentActions}>
+                  <button
+                    onClick={() => navigate(`/member/${item.author?._id}`)}
+                    className={styles.actionButton}
+                  >
+                    <span className="material-icons">person</span>
+                    View Author
+                  </button>
+
+                  {item.type === 'post' && (
+                    <button
+                      onClick={() => navigate(`/post/${item._id}`)}
+                      className={styles.actionButton}
+                    >
+                      <span className="material-icons">visibility</span>
+                      View Post
+                    </button>
+                  )}
+
+                  {item.reported?.moderationStatus === 'pending' && (
+                    <>
+                      <button
+                        onClick={() => handleApprove(item._id, item.type)}
+                        className={`${styles.actionButton} ${styles.success}`}
+                      >
+                        <span className="material-icons">check_circle</span>
+                        Approve
+                      </button>
+                      <button
+                        onClick={() => handleReject(item._id, item.type)}
+                        className={`${styles.actionButton} ${styles.warning}`}
+                      >
+                        <span className="material-icons">cancel</span>
+                        Reject
+                      </button>
+                    </>
+                  )}
+
+                  <button
+                    onClick={() => handleDelete(item._id, item.type)}
+                    className={`${styles.actionButton} ${styles.danger}`}
+                  >
+                    <span className="material-icons">delete</span>
+                    Delete
+                  </button>
+                </div>
               </div>
             ))}
           </div>
