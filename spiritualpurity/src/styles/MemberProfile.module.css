@@ -534,13 +534,13 @@
 /* Responsive Design - Including Header Width Fix */
 @media (max-width: 768px) {
   .memberProfilePage {
-    padding: 0 1rem;
+    padding: 0;
     width: 100%;
     overflow-x: hidden;
   }
 
   .profileContainer {
-    margin: 1rem auto;
+    margin: 0;
     width: 100% !important;
     max-width: 100% !important;
     padding: 0;
