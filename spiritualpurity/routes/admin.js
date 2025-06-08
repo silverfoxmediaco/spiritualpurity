@@ -1,8 +1,8 @@
+// routes/admin.js
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
-const moderatorAuth = require('../middleware/moderatorAuth');
-const adminAuth = require('../middleware/adminAuth');
+const { adminAuth, moderatorAuth } = require('../middleware/adminAuth');
 const Post = require('../models/Post');
 const Message = require('../models/Message');
 const Conversation = require('../models/Conversation');
