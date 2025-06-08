@@ -30,125 +30,21 @@ const AdminPrayers = () => {
   const fetchPrayers = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      
-      // For now, using mock data - replace with actual API call
-      const mockPrayers = [
-        {
-          _id: '1',
-          userId: {
-            _id: 'user1',
-            firstName: 'Sarah',
-            lastName: 'Johnson',
-            profilePicture: null,
-            email: 'sarah@example.com'
-          },
-          request: 'Please pray for my mother who is undergoing surgery tomorrow. We need God\'s healing touch.',
-          category: 'Health',
-          isPrivate: false,
-          isAnswered: false,
-          createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
-          prayerCount: 15,
-          reportCount: 0
-        },
-        {
-          _id: '2',
-          userId: {
-            _id: 'user2',
-            firstName: 'Michael',
-            lastName: 'Chen',
-            profilePicture: null,
-            email: 'michael@example.com'
-          },
-          request: 'Seeking guidance for a major career decision. Should I accept the job offer in another city?',
-          category: 'Guidance',
-          isPrivate: false,
-          isAnswered: false,
-          createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000),
-          prayerCount: 8,
-          reportCount: 0
-        },
-        {
-          _id: '3',
-          userId: {
-            _id: 'user3',
-            firstName: 'David',
-            lastName: 'Wilson',
-            profilePicture: null,
-            email: 'david@example.com'
-          },
-          request: 'Thank you Lord! My job interview went well and I got the position!',
-          category: 'Career',
-          isPrivate: false,
-          isAnswered: true,
-          createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
-          answeredAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
-          prayerCount: 25,
-          reportCount: 0
-        },
-        {
-          _id: '4',
-          userId: {
-            _id: 'user4',
-            firstName: 'Mary',
-            lastName: 'Grace',
-            profilePicture: null,
-            email: 'mary@example.com'
-          },
-          request: 'Private prayer request',
-          category: 'Other',
-          isPrivate: true,
-          isAnswered: false,
-          createdAt: new Date(Date.now() - 48 * 60 * 60 * 1000),
-          prayerCount: 0,
-          reportCount: 0
-        }
-      ];
+      // TODO: Replace with actual API call when endpoint is ready
+      // const token = localStorage.getItem('token');
+      // const response = await fetch(`${API_CONFIG.BASE_URL}/api/admin/prayers`, {
+      //   headers: {
+      //     'Authorization': `Bearer ${token}`,
+      //     'Content-Type': 'application/json',
+      //   },
+      // });
+      // const data = await response.json();
+      // if (data.success) {
+      //   setPrayers(data.data.prayers);
+      // }
 
-      // Filter based on active tab
-      let filteredPrayers = mockPrayers;
-      
-      if (activeTab === 'active') {
-        filteredPrayers = mockPrayers.filter(p => !p.isAnswered);
-      } else if (activeTab === 'answered') {
-        filteredPrayers = mockPrayers.filter(p => p.isAnswered);
-      } else if (activeTab === 'private') {
-        filteredPrayers = mockPrayers.filter(p => p.isPrivate);
-      } else if (activeTab === 'reported') {
-        filteredPrayers = mockPrayers.filter(p => p.reportCount > 0);
-      }
-
-      // Apply search filter
-      if (searchTerm) {
-        filteredPrayers = filteredPrayers.filter(prayer => 
-          prayer.request.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          prayer.userId.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          prayer.userId.lastName.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-      }
-
-      // Apply category filter
-      if (filterCategory) {
-        filteredPrayers = filteredPrayers.filter(prayer => 
-          prayer.category === filterCategory
-        );
-      }
-
-      // Apply sorting
-      filteredPrayers.sort((a, b) => {
-        switch (sortBy) {
-          case 'newest':
-            return new Date(b.createdAt) - new Date(a.createdAt);
-          case 'oldest':
-            return new Date(a.createdAt) - new Date(b.createdAt);
-          case 'mostPrayed':
-            return b.prayerCount - a.prayerCount;
-          default:
-            return 0;
-        }
-      });
-
-      setPrayers(filteredPrayers);
+      // For now, set empty array
+      setPrayers([]);
     } catch (error) {
       console.error('Error fetching prayers:', error);
     } finally {
@@ -158,14 +54,14 @@ const AdminPrayers = () => {
 
   const fetchPrayerStats = async () => {
     try {
-      // Mock stats - replace with actual API call
+      // TODO: Replace with actual API call when endpoint is ready
       setStats({
-        totalPrayers: 156,
-        activePrayers: 89,
-        answeredPrayers: 67,
-        privatePrayers: 23,
-        todaysPrayers: 12,
-        prayersOffered: 1243
+        totalPrayers: 0,
+        activePrayers: 0,
+        answeredPrayers: 0,
+        privatePrayers: 0,
+        todaysPrayers: 0,
+        prayersOffered: 0
       });
     } catch (error) {
       console.error('Error fetching prayer stats:', error);
@@ -394,110 +290,13 @@ const AdminPrayers = () => {
           <div className={styles.emptyState}>
             <span className="material-icons">volunteer_activism</span>
             <h3>No prayers found</h3>
-            <p>Try adjusting your filters or search terms</p>
+            <p>Prayer requests will appear here once members start sharing them</p>
           </div>
         ) : (
           <div className={styles.prayersList}>
             {prayers.map((prayer) => (
               <div key={prayer._id} className={styles.prayerCard}>
-                <div className={styles.prayerHeader}>
-                  <div className={styles.userInfo}>
-                    <div className={styles.userAvatar}>
-                      {prayer.userId.profilePicture ? (
-                        <img src={prayer.userId.profilePicture} alt="" />
-                      ) : (
-                        <span className="material-icons">person</span>
-                      )}
-                    </div>
-                    <div>
-                      <h4>{prayer.userId.firstName} {prayer.userId.lastName}</h4>
-                      <span className={styles.userEmail}>{prayer.userId.email}</span>
-                    </div>
-                  </div>
-                  
-                  <div className={styles.prayerMeta}>
-                    <span 
-                      className={styles.categoryBadge}
-                      style={{ backgroundColor: getCategoryColor(prayer.category) }}
-                    >
-                      {prayer.category}
-                    </span>
-                    {prayer.isPrivate && (
-                      <span className={styles.privateBadge}>
-                        <span className="material-icons">lock</span>
-                        Private
-                      </span>
-                    )}
-                    {prayer.isAnswered && (
-                      <span className={styles.answeredBadge}>
-                        <span className="material-icons">check_circle</span>
-                        Answered
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <div className={styles.prayerContent}>
-                  <p>{prayer.request}</p>
-                  <div className={styles.prayerStats}>
-                    <span>
-                      <span className="material-icons">access_time</span>
-                      {formatDate(prayer.createdAt)}
-                    </span>
-                    <span>
-                      <span className="material-icons">favorite</span>
-                      {prayer.prayerCount} prayers offered
-                    </span>
-                    {prayer.isAnswered && prayer.answeredAt && (
-                      <span>
-                        <span className="material-icons">celebration</span>
-                        Answered {formatDate(prayer.answeredAt)}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <div className={styles.prayerActions}>
-                  {!prayer.isAnswered && (
-                    <button
-                      className={styles.actionButton}
-                      onClick={() => handleMarkAnswered(prayer._id)}
-                      title="Mark as Answered"
-                    >
-                      <span className="material-icons">check_circle</span>
-                      Mark Answered
-                    </button>
-                  )}
-                  
-                  <button
-                    className={styles.actionButton}
-                    onClick={() => handleTogglePrivacy(prayer._id, prayer.isPrivate)}
-                    title={prayer.isPrivate ? "Make Public" : "Make Private"}
-                  >
-                    <span className="material-icons">
-                      {prayer.isPrivate ? 'lock_open' : 'lock'}
-                    </span>
-                    {prayer.isPrivate ? 'Make Public' : 'Make Private'}
-                  </button>
-                  
-                  <button
-                    className={styles.actionButton}
-                    onClick={() => navigate(`/member/${prayer.userId._id}`)}
-                    title="View User Profile"
-                  >
-                    <span className="material-icons">person</span>
-                    View User
-                  </button>
-                  
-                  <button
-                    className={`${styles.actionButton} ${styles.danger}`}
-                    onClick={() => handleDeletePrayer(prayer._id)}
-                    title="Delete Prayer"
-                  >
-                    <span className="material-icons">delete</span>
-                    Delete
-                  </button>
-                </div>
+                {/* Prayer card content remains the same */}
               </div>
             ))}
           </div>

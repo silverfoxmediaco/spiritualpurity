@@ -21,6 +21,7 @@ const AdminDashboard = () => {
   const [recentUsers, setRecentUsers] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     fetchDashboardData();
@@ -38,11 +39,15 @@ const AdminDashboard = () => {
         },
       });
 
-      if (statsResponse.ok) {
-        const statsData = await statsResponse.json();
-        if (statsData.success) {
-          setStats(statsData.data);
-        }
+      if (!statsResponse.ok) {
+        throw new Error('Failed to fetch dashboard stats');
+      }
+
+      const statsData = await statsResponse.json();
+      if (statsData.success) {
+        setStats(statsData.data);
+      } else {
+        setError(statsData.message || 'Failed to load dashboard stats');
       }
 
       // Fetch recent users
@@ -60,17 +65,26 @@ const AdminDashboard = () => {
         }
       }
 
-      // Mock recent activity for now
-      setRecentActivity([
-        { type: 'user', message: 'New user Sarah Johnson joined', time: '2 hours ago', icon: 'person_add' },
-        { type: 'prayer', message: 'John Doe posted a prayer request', time: '3 hours ago', icon: 'volunteer_activism' },
-        { type: 'post', message: 'Mary Smith shared a testimony', time: '5 hours ago', icon: 'article' },
-        { type: 'report', message: 'Content reported by user', time: '6 hours ago', icon: 'flag' },
-        { type: 'connection', message: '2 new connections made', time: '8 hours ago', icon: 'people' }
-      ]);
+      // TODO: Fetch real recent activity when endpoint is ready
+      // const activityResponse = await fetch(`${API_CONFIG.BASE_URL}/api/admin/dashboard/recent-activity`, {
+      //   headers: {
+      //     'Authorization': `Bearer ${token}`,
+      //     'Content-Type': 'application/json',
+      //   },
+      // });
+      // if (activityResponse.ok) {
+      //   const activityData = await activityResponse.json();
+      //   if (activityData.success) {
+      //     setRecentActivity(activityData.data.activities);
+      //   }
+      // }
+
+      // For now, set empty array for recent activity
+      setRecentActivity([]);
 
     } catch (error) {
       console.error('Dashboard data error:', error);
+      setError('Failed to load dashboard data');
     } finally {
       setLoading(false);
     }
@@ -82,6 +96,21 @@ const AdminDashboard = () => {
       day: 'numeric'
     });
   };
+
+  if (error) {
+    return (
+      <div className={styles.adminDashboard}>
+        <div className={styles.errorContainer}>
+          <span className="material-icons">error</span>
+          <h2>Error Loading Dashboard</h2>
+          <p>{error}</p>
+          <button onClick={fetchDashboardData} className={styles.retryButton}>
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.adminDashboard}>
@@ -103,34 +132,62 @@ const AdminDashboard = () => {
       <div className={styles.statsGrid}>
         <StatsCard
           title="Total Users"
-          value={stats.totalUsers}
+          value={stats.totalUsers.toLocaleString()}
           icon="people"
           color="primary"
           trend="up"
-          trendValue="+12% this month"
+          trendValue={`+${stats.newUsersThisMonth} this month`}
           loading={loading}
         />
         <StatsCard
           title="New This Month"
-          value={stats.newUsersThisMonth}
+          value={stats.newUsersThisMonth.toLocaleString()}
           icon="person_add"
           color="success"
           loading={loading}
         />
         <StatsCard
           title="Total Posts"
-          value={stats.totalPosts}
+          value={stats.totalPosts.toLocaleString()}
           icon="article"
           color="info"
           loading={loading}
         />
         <StatsCard
           title="Prayer Requests"
-          value={stats.totalPrayers}
+          value={stats.totalPrayers.toLocaleString()}
           icon="volunteer_activism"
           color="warning"
           trend="up"
           trendValue={`${stats.activePrayers} active`}
+          loading={loading}
+        />
+        <StatsCard
+          title="Active Prayers"
+          value={stats.activePrayers.toLocaleString()}
+          icon="pending"
+          color="success"
+          loading={loading}
+        />
+        <StatsCard
+          title="Connections"
+          value={stats.totalConnections.toLocaleString()}
+          icon="people_alt"
+          color="primary"
+          loading={loading}
+        />
+        <StatsCard
+          title="Messages Sent"
+          value={stats.totalMessages.toLocaleString()}
+          icon="message"
+          color="info"
+          loading={loading}
+        />
+        <StatsCard
+          title="Reported Content"
+          value={stats.reportedContent.toLocaleString()}
+          icon="flag"
+          color={stats.reportedContent > 0 ? "danger" : "success"}
           loading={loading}
         />
       </div>
@@ -149,17 +206,24 @@ const AdminDashboard = () => {
               </button>
             </div>
             <div className={styles.activityList}>
-              {recentActivity.map((activity, index) => (
-                <div key={index} className={styles.activityItem}>
-                  <div className={`${styles.activityIcon} ${styles[activity.type]}`}>
-                    <span className="material-icons">{activity.icon}</span>
-                  </div>
-                  <div className={styles.activityContent}>
-                    <p>{activity.message}</p>
-                    <span className={styles.activityTime}>{activity.time}</span>
-                  </div>
+              {recentActivity.length === 0 ? (
+                <div className={styles.emptyState}>
+                  <span className="material-icons">event_note</span>
+                  <p>No recent activity to display</p>
                 </div>
-              ))}
+              ) : (
+                recentActivity.map((activity, index) => (
+                  <div key={index} className={styles.activityItem}>
+                    <div className={`${styles.activityIcon} ${styles[activity.type]}`}>
+                      <span className="material-icons">{activity.icon}</span>
+                    </div>
+                    <div className={styles.activityContent}>
+                      <p>{activity.message}</p>
+                      <span className={styles.activityTime}>{activity.time}</span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
@@ -190,10 +254,10 @@ const AdminDashboard = () => {
               </button>
               <button 
                 className={styles.actionCard}
-                onClick={() => navigate('/admin/announcements')}
+                onClick={() => navigate('/admin/messages')}
               >
-                <span className="material-icons">campaign</span>
-                <span>Announcement</span>
+                <span className="material-icons">message</span>
+                <span>Monitor Messages</span>
               </button>
             </div>
           </div>
@@ -212,25 +276,31 @@ const AdminDashboard = () => {
               </button>
             </div>
             <div className={styles.usersList}>
-              {recentUsers.map((user) => (
-                <div 
-                  key={user._id} 
-                  className={styles.userItem}
-                  onClick={() => navigate(`/member/${user._id}`)}
-                >
-                  <div className={styles.userAvatar}>
-                    {user.profilePicture ? (
-                      <img src={user.profilePicture} alt={user.firstName} />
-                    ) : (
-                      <span className="material-icons">person</span>
-                    )}
+              {recentUsers.length > 0 ? (
+                recentUsers.map((user) => (
+                  <div 
+                    key={user._id} 
+                    className={styles.userItem}
+                    onClick={() => navigate(`/member/${user._id}`)}
+                  >
+                    <div className={styles.userAvatar}>
+                      {user.profilePicture ? (
+                        <img src={user.profilePicture} alt={user.firstName} />
+                      ) : (
+                        <span className="material-icons">person</span>
+                      )}
+                    </div>
+                    <div className={styles.userInfo}>
+                      <h4>{user.firstName} {user.lastName}</h4>
+                      <p>Joined {formatDate(user.joinDate)}</p>
+                    </div>
                   </div>
-                  <div className={styles.userInfo}>
-                    <h4>{user.firstName} {user.lastName}</h4>
-                    <p>Joined {formatDate(user.joinDate)}</p>
-                  </div>
+                ))
+              ) : (
+                <div className={styles.emptyState}>
+                  <p>No new members yet</p>
                 </div>
-              ))}
+              )}
             </div>
           </div>
 
@@ -246,6 +316,7 @@ const AdminDashboard = () => {
                 <p>Database: Connected</p>
                 <p>Storage: 23% Used</p>
                 <p>API: Responding</p>
+                <p>Last Update: {new Date().toLocaleTimeString()}</p>
               </div>
             </div>
           </div>

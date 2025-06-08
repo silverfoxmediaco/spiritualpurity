@@ -20,7 +20,7 @@ const AdminMessages = () => {
     reportedMessages: 0,
     flaggedUsers: 0,
     messagesThisWeek: 0,
-    averageResponseTime: '2.5 hours'
+    averageResponseTime: '0 hours'
   });
 
   useEffect(() => {
@@ -37,118 +37,21 @@ const AdminMessages = () => {
   const fetchConversations = async () => {
     setLoading(true);
     try {
-      // Mock data - replace with actual API call
-      const mockConversations = [
-        {
-          _id: '1',
-          participants: [
-            {
-              _id: 'user1',
-              firstName: 'Sarah',
-              lastName: 'Johnson',
-              profilePicture: null,
-              email: 'sarah@example.com'
-            },
-            {
-              _id: 'user2',
-              firstName: 'Michael',
-              lastName: 'Chen',
-              profilePicture: null,
-              email: 'michael@example.com'
-            }
-          ],
-          lastMessage: {
-            content: 'Thank you for your prayers, they mean so much to me!',
-            createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
-            sender: 'user1'
-          },
-          messageCount: 12,
-          createdAt: new Date(Date.now() - 48 * 60 * 60 * 1000),
-          hasReportedMessages: false,
-          isActive: true
-        },
-        {
-          _id: '2',
-          participants: [
-            {
-              _id: 'user3',
-              firstName: 'David',
-              lastName: 'Wilson',
-              profilePicture: null,
-              email: 'david@example.com'
-            },
-            {
-              _id: 'user4',
-              firstName: 'Mary',
-              lastName: 'Grace',
-              profilePicture: null,
-              email: 'mary@example.com'
-            }
-          ],
-          lastMessage: {
-            content: 'Can we schedule a prayer meeting this weekend?',
-            createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000),
-            sender: 'user3'
-          },
-          messageCount: 8,
-          createdAt: new Date(Date.now() - 72 * 60 * 60 * 1000),
-          hasReportedMessages: false,
-          isActive: true
-        },
-        {
-          _id: '3',
-          participants: [
-            {
-              _id: 'user5',
-              firstName: 'John',
-              lastName: 'Doe',
-              profilePicture: null,
-              email: 'john@example.com'
-            },
-            {
-              _id: 'user6',
-              firstName: 'Jane',
-              lastName: 'Smith',
-              profilePicture: null,
-              email: 'jane@example.com'
-            }
-          ],
-          lastMessage: {
-            content: 'This message contains inappropriate content...',
-            createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
-            sender: 'user5'
-          },
-          messageCount: 5,
-          createdAt: new Date(Date.now() - 96 * 60 * 60 * 1000),
-          hasReportedMessages: true,
-          reportCount: 3,
-          isActive: false
-        }
-      ];
+      // TODO: Replace with actual API call when endpoint is ready
+      // const token = localStorage.getItem('token');
+      // const response = await fetch(`${API_CONFIG.BASE_URL}/api/admin/conversations`, {
+      //   headers: {
+      //     'Authorization': `Bearer ${token}`,
+      //     'Content-Type': 'application/json',
+      //   },
+      // });
+      // const data = await response.json();
+      // if (data.success) {
+      //   setConversations(data.data.conversations);
+      // }
 
-      // Filter based on active tab
-      let filteredConversations = mockConversations;
-      
-      if (activeTab === 'active') {
-        filteredConversations = mockConversations.filter(c => c.isActive);
-      } else if (activeTab === 'reported') {
-        filteredConversations = mockConversations.filter(c => c.hasReportedMessages);
-      } else if (activeTab === 'archived') {
-        filteredConversations = mockConversations.filter(c => !c.isActive);
-      }
-
-      // Apply search filter
-      if (searchTerm) {
-        filteredConversations = filteredConversations.filter(conv => {
-          const participantNames = conv.participants.map(p => 
-            `${p.firstName} ${p.lastName}`.toLowerCase()
-          ).join(' ');
-          return participantNames.includes(searchTerm.toLowerCase()) ||
-                 conv.lastMessage.content.toLowerCase().includes(searchTerm.toLowerCase());
-        });
-      }
-
-      setConversations(filteredConversations);
+      // For now, set empty array
+      setConversations([]);
     } catch (error) {
       console.error('Error fetching conversations:', error);
     } finally {
@@ -158,59 +61,21 @@ const AdminMessages = () => {
 
   const fetchMessages = async (conversationId) => {
     try {
-      // Mock messages - replace with actual API call
-      const mockMessages = [
-        {
-          _id: 'm1',
-          conversationId: conversationId,
-          sender: {
-            _id: 'user1',
-            firstName: 'Sarah',
-            lastName: 'Johnson'
-          },
-          content: 'Hi Michael, I wanted to thank you for praying for my mother.',
-          createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000),
-          isReported: false
-        },
-        {
-          _id: 'm2',
-          conversationId: conversationId,
-          sender: {
-            _id: 'user2',
-            firstName: 'Michael',
-            lastName: 'Chen'
-          },
-          content: 'Of course, Sarah! How is she doing now?',
-          createdAt: new Date(Date.now() - 2.5 * 60 * 60 * 1000),
-          isReported: false
-        },
-        {
-          _id: 'm3',
-          conversationId: conversationId,
-          sender: {
-            _id: 'user1',
-            firstName: 'Sarah',
-            lastName: 'Johnson'
-          },
-          content: 'She\'s recovering well, praise God! The surgery went smoothly.',
-          createdAt: new Date(Date.now() - 2.2 * 60 * 60 * 1000),
-          isReported: false
-        },
-        {
-          _id: 'm4',
-          conversationId: conversationId,
-          sender: {
-            _id: 'user2',
-            firstName: 'Michael',
-            lastName: 'Chen'
-          },
-          content: 'That\'s wonderful news! God is good!',
-          createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
-          isReported: false
-        }
-      ];
+      // TODO: Replace with actual API call when endpoint is ready
+      // const token = localStorage.getItem('token');
+      // const response = await fetch(`${API_CONFIG.BASE_URL}/api/admin/messages/${conversationId}`, {
+      //   headers: {
+      //     'Authorization': `Bearer ${token}`,
+      //     'Content-Type': 'application/json',
+      //   },
+      // });
+      // const data = await response.json();
+      // if (data.success) {
+      //   setMessages(data.data.messages);
+      // }
 
-      setMessages(mockMessages);
+      // For now, set empty array
+      setMessages([]);
     } catch (error) {
       console.error('Error fetching messages:', error);
     }
@@ -218,14 +83,14 @@ const AdminMessages = () => {
 
   const fetchMessageStats = async () => {
     try {
-      // Mock stats - replace with actual API call
+      // TODO: Replace with actual API call when endpoint is ready
       setStats({
-        totalConversations: 234,
-        activeConversations: 189,
-        reportedMessages: 12,
-        flaggedUsers: 3,
-        messagesThisWeek: 1456,
-        averageResponseTime: '2.5 hours'
+        totalConversations: 0,
+        activeConversations: 0,
+        reportedMessages: 0,
+        flaggedUsers: 0,
+        messagesThisWeek: 0,
+        averageResponseTime: '0 hours'
       });
     } catch (error) {
       console.error('Error fetching message stats:', error);
@@ -479,36 +344,42 @@ const AdminMessages = () => {
               </div>
 
               <div className={styles.messagesContent}>
-                {messages.map((message) => (
-                  <div 
-                    key={message._id}
-                    className={`${styles.messageItem} ${message.isReported ? styles.reported : ''}`}
-                  >
-                    <div className={styles.messageHeader}>
-                      <strong>{message.sender.firstName} {message.sender.lastName}</strong>
-                      <span>{formatDate(message.createdAt)}</span>
-                    </div>
-                    <div className={styles.messageBody}>
-                      <p>{message.content}</p>
-                    </div>
-                    <div className={styles.messageActions}>
-                      <button
-                        className={styles.messageActionButton}
-                        onClick={() => navigate(`/member/${message.sender._id}`)}
-                        title="View User"
-                      >
-                        <span className="material-icons">person</span>
-                      </button>
-                      <button
-                        className={`${styles.messageActionButton} ${styles.danger}`}
-                        onClick={() => handleDeleteMessage(message._id)}
-                        title="Delete Message"
-                      >
-                        <span className="material-icons">delete</span>
-                      </button>
-                    </div>
+                {messages.length === 0 ? (
+                  <div className={styles.emptyState}>
+                    <p>No messages to display</p>
                   </div>
-                ))}
+                ) : (
+                  messages.map((message) => (
+                    <div 
+                      key={message._id}
+                      className={`${styles.messageItem} ${message.isReported ? styles.reported : ''}`}
+                    >
+                      <div className={styles.messageHeader}>
+                        <strong>{message.sender.firstName} {message.sender.lastName}</strong>
+                        <span>{formatDate(message.createdAt)}</span>
+                      </div>
+                      <div className={styles.messageBody}>
+                        <p>{message.content}</p>
+                      </div>
+                      <div className={styles.messageActions}>
+                        <button
+                          className={styles.messageActionButton}
+                          onClick={() => navigate(`/member/${message.sender._id}`)}
+                          title="View User"
+                        >
+                          <span className="material-icons">person</span>
+                        </button>
+                        <button
+                          className={`${styles.messageActionButton} ${styles.danger}`}
+                          onClick={() => handleDeleteMessage(message._id)}
+                          title="Delete Message"
+                        >
+                          <span className="material-icons">delete</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
 
               <div className={styles.conversationFooter}>

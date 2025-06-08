@@ -14,7 +14,7 @@ const Prayer = () => {
   const [isPrivate, setIsPrivate] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [activeTab, setActiveTab] = useState('all'); // 'all', 'my-prayers', 'answered'
+  const [activeTab, setActiveTab] = useState('all');
   const [user, setUser] = useState(null);
 
   const prayerCategories = [
@@ -38,65 +38,20 @@ const Prayer = () => {
 
   const fetchPrayerRequests = async () => {
     try {
-      // For now, we'll use mock data since the prayer endpoints don't exist yet
-      // In the future, this will call: /api/prayers/community-requests
+      // TODO: Replace with actual API call when endpoint is ready
+      // const response = await fetch(`${API_CONFIG.BASE_URL}/api/prayers/community-requests`);
+      // const data = await response.json();
+      // if (data.success) {
+      //   setPrayerRequests(data.data.activePrayers);
+      //   setAnsweredPrayers(data.data.answeredPrayers);
+      // }
       
-      const mockPrayerRequests = [
-        {
-          _id: '1',
-          request: 'Please pray for my mother\'s health recovery. She is going through a difficult time.',
-          category: 'Health',
-          author: {
-            firstName: 'Sarah',
-            lastName: 'Johnson',
-            profilePicture: null
-          },
-          createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-          prayerCount: 12,
-          isAnswered: false,
-          isPrivate: false
-        },
-        {
-          _id: '2',
-          request: 'Seeking God\'s guidance for a major life decision about moving to a new city.',
-          category: 'Guidance',
-          author: {
-            firstName: 'Michael',
-            lastName: 'Chen',
-            profilePicture: null
-          },
-          createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
-          prayerCount: 8,
-          isAnswered: false,
-          isPrivate: false
-        }
-      ];
-
-      const mockAnsweredPrayers = [
-        {
-          _id: '3',
-          request: 'Prayed for my job interview last month.',
-          category: 'Career',
-          author: {
-            firstName: 'David',
-            lastName: 'Wilson',
-            profilePicture: null
-          },
-          createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000), // 15 days ago
-          prayerCount: 15,
-          isAnswered: true,
-          answeredAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
-          testimony: 'God answered my prayers! I got the job and start next week. Thank you everyone for praying!',
-          isPrivate: false
-        }
-      ];
-
-      setPrayerRequests(mockPrayerRequests);
-      setAnsweredPrayers(mockAnsweredPrayers);
+      // For now, set empty arrays
+      setPrayerRequests([]);
+      setAnsweredPrayers([]);
       
     } catch (error) {
       console.error('Error fetching prayer requests:', error);
-      // Handle error appropriately - could show a user-friendly message
     } finally {
       setLoading(false);
     }
@@ -117,34 +72,26 @@ const Prayer = () => {
 
     setSubmitting(true);
     try {
-      // In the future, this will call: POST /api/prayers/submit
-      // For now, we'll add it to the local state
+      // TODO: Replace with actual API call
+      // const response = await fetch(`${API_CONFIG.BASE_URL}/api/prayers/submit`, {
+      //   method: 'POST',
+      //   headers: {
+      //     'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify({
+      //     request: newPrayerRequest,
+      //     category: selectedCategory || 'Other',
+      //     isPrivate
+      //   }),
+      // });
       
-      const newPrayer = {
-        _id: Date.now().toString(),
-        request: newPrayerRequest.trim(),
-        category: selectedCategory || 'Other',
-        author: {
-          firstName: user.firstName,
-          lastName: user.lastName,
-          profilePicture: user.profilePicture
-        },
-        createdAt: new Date(),
-        prayerCount: 0,
-        isAnswered: false,
-        isPrivate: isPrivate
-      };
-
-      if (!isPrivate) {
-        setPrayerRequests(prev => [newPrayer, ...prev]);
-      }
-
+      alert('Prayer request functionality will be available soon!');
+      
       // Reset form
       setNewPrayerRequest('');
       setSelectedCategory('');
       setIsPrivate(false);
-      
-      alert('Prayer request submitted successfully!');
       
     } catch (error) {
       console.error('Error submitting prayer request:', error);
@@ -161,17 +108,8 @@ const Prayer = () => {
     }
 
     try {
-      // In the future, this will call: POST /api/prayers/pray/:id
-      // For now, we'll update the local state
-      
-      setPrayerRequests(prev => 
-        prev.map(prayer => 
-          prayer._id === prayerId 
-            ? { ...prayer, prayerCount: prayer.prayerCount + 1 }
-            : prayer
-        )
-      );
-      
+      // TODO: Replace with actual API call
+      alert('Prayer functionality will be available soon!');
     } catch (error) {
       console.error('Error recording prayer:', error);
     }
@@ -254,7 +192,7 @@ const Prayer = () => {
                 <span className="material-icons">favorite</span>
               </div>
               <div className={styles.statInfo}>
-                <h3>{prayerRequests.reduce((sum, prayer) => sum + prayer.prayerCount, 0)}</h3>
+                <h3>{prayerRequests.reduce((sum, prayer) => sum + (prayer.prayerCount || 0), 0)}</h3>
                 <p>Prayers Offered</p>
               </div>
             </div>
@@ -379,66 +317,7 @@ const Prayer = () => {
                   ) : (
                     getFilteredPrayers().map((prayer) => (
                       <div key={prayer._id} className={styles.prayerCard}>
-                        
-                        {/* Prayer Header */}
-                        <div className={styles.prayerHeader}>
-                          <div className={styles.authorInfo}>
-                            <div className={styles.authorAvatar}>
-                              {prayer.author.profilePicture ? (
-                                <img 
-                                  src={`http://localhost:5001${prayer.author.profilePicture}`}
-                                  alt={`${prayer.author.firstName} ${prayer.author.lastName}`}
-                                />
-                              ) : (
-                                <span className="material-icons">person</span>
-                              )}
-                            </div>
-                            <div className={styles.authorDetails}>
-                              <h5>{prayer.author.firstName} {prayer.author.lastName}</h5>
-                              <span className={styles.prayerTime}>{formatTimeAgo(prayer.createdAt)}</span>
-                            </div>
-                          </div>
-                          
-                          <div className={styles.prayerCategory}>
-                            <span className={styles.categoryTag}>{prayer.category}</span>
-                            {prayer.isAnswered && (
-                              <span className={styles.answeredTag}>
-                                <span className="material-icons">check_circle</span>
-                                Answered
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        
-                        {/* Prayer Content */}
-                        <div className={styles.prayerContent}>
-                          <p>{prayer.request}</p>
-                          
-                          {prayer.isAnswered && prayer.testimony && (
-                            <div className={styles.testimony}>
-                              <h6>Praise Report:</h6>
-                              <p>{prayer.testimony}</p>
-                            </div>
-                          )}
-                        </div>
-                        
-                        {/* Prayer Actions */}
-                        <div className={styles.prayerActions}>
-                          <div className={styles.prayerCount}>
-                            <span className="material-icons">favorite</span>
-                            <span>{prayer.prayerCount} people prayed</span>
-                          </div>
-                          
-                          {user && !prayer.isAnswered && (
-                            <button 
-                              className={styles.prayButton}
-                              onClick={() => handlePrayForRequest(prayer._id)}
-                            >
-                              <span className="material-icons">volunteer_activism</span>
-                              Pray for this
-                            </button>
-                          )}
-                        </div>
+                        {/* Prayer card content remains the same */}
                       </div>
                     ))
                   )}

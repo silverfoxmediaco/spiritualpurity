@@ -3,6 +3,8 @@
 const express = require('express');
 const User = require('../models/User');
 const Post = require('../models/Post');
+const Connection = require('../models/Connection');
+const Message = require('../models/Message');
 const { adminAuth, moderatorAuth } = require('../middleware/adminAuth');
 
 const router = express.Router();
@@ -87,18 +89,66 @@ router.post('/login', async (req, res) => {
 // @access  Admin/Moderator
 router.get('/dashboard/stats', moderatorAuth, async (req, res) => {
   try {
-    // Get various statistics
+    // Get total active users
     const totalUsers = await User.countDocuments({ isActive: true });
+    
+    // Get new users this month
+    const firstDayOfMonth = new Date();
+    firstDayOfMonth.setDate(1);
+    firstDayOfMonth.setHours(0, 0, 0, 0);
+    
     const newUsersThisMonth = await User.countDocuments({
       isActive: true,
-      joinDate: { $gte: new Date(new Date().setDate(1)) }
+      joinDate: { $gte: firstDayOfMonth }
     });
     
-    const totalPosts = await Post.countDocuments({ status: 'published' });
-    const totalPrayers = await User.aggregate([
+    // Get total posts (active, non-removed posts)
+    const totalPosts = await Post.countDocuments({ 
+      isActive: true,
+      'reported.moderationStatus': { $ne: 'removed' }
+    });
+    
+    // Get total prayers and active prayers using aggregation
+    const prayerStats = await User.aggregate([
       { $unwind: '$prayerRequests' },
-      { $count: 'total' }
+      { 
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          active: { 
+            $sum: { 
+              $cond: [{ $eq: ['$prayerRequests.isAnswered', false] }, 1, 0] 
+            }
+          }
+        }
+      }
     ]);
+    
+    const totalPrayers = prayerStats[0]?.total || 0;
+    const activePrayers = prayerStats[0]?.active || 0;
+    
+    // Get total accepted connections
+    const totalConnections = await Connection.countDocuments({ 
+      status: 'accepted' 
+    });
+    
+    // Get total messages (excluding deleted and removed)
+    const totalMessages = await Message.countDocuments({
+      'reported.moderationStatus': { $ne: 'removed' }
+    });
+    
+    // Get reported content count
+    const reportedPosts = await Post.countDocuments({
+      'reported.isReported': true,
+      'reported.moderationStatus': 'pending'
+    });
+    
+    const reportedMessages = await Message.countDocuments({
+      'reported.isReported': true,
+      'reported.moderationStatus': 'pending'
+    });
+    
+    const reportedContent = reportedPosts + reportedMessages;
 
     res.json({
       success: true,
@@ -106,8 +156,11 @@ router.get('/dashboard/stats', moderatorAuth, async (req, res) => {
         totalUsers,
         newUsersThisMonth,
         totalPosts,
-        totalPrayers: totalPrayers[0]?.total || 0,
-        // Add more stats as needed
+        totalPrayers,
+        activePrayers,
+        totalConnections,
+        totalMessages,
+        reportedContent
       }
     });
 
