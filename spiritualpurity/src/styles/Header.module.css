@@ -270,6 +270,7 @@
   .headerContainer {
     grid-template-columns: 1fr auto;
     gap: 1rem;
+    margin-bottom: 5px;
   }
   
   .navigation {
