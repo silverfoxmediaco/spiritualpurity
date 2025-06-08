@@ -1,38 +1,428 @@
-.App {
-  text-align: center;
+/* src/App.css */
+
+/* Reset and Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  width: 100%;
+  overflow-x: hidden;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+body {
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f8fafc;
+  color: #333;
+  line-height: 1.6;
+  width: 100%;
+  overflow-x: hidden;
+  position: relative;
+  margin: 0;
+  padding: 0;
 }
 
-.App-header {
-  background-color: #282c34;
+#root {
+  width: 100%;
   min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.App {
+  width: 100%;
+  overflow-x: hidden;
+  position: relative;
+  text-align: left;
+  background-color: #f8fafc;
+  min-height: 100vh;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  color: #2c3e50;
+}
+
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.75rem; }
+h4 { font-size: 1.5rem; }
+h5 { font-size: 1.25rem; }
+h6 { font-size: 1rem; }
+
+p {
+  margin-bottom: 1rem;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Links */
+a {
+  color: #f59e0b;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: #d97706;
+}
+
+/* Container System */
+.container {
+  width: 100%;
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+@media (min-width: 576px) {
+  .container {
+    max-width: 540px;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 720px;
+  }
+}
+
+@media (min-width: 992px) {
+  .container {
+    max-width: 960px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .container {
+    max-width: 1140px;
+  }
+}
+
+@media (min-width: 1400px) {
+  .container {
+    max-width: 1320px;
+  }
+}
+
+/* Container Fluid */
+.container-fluid {
+  width: 100%;
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+/* Grid System */
+.row {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  flex-wrap: wrap;
+  margin-right: -15px;
+  margin-left: -15px;
 }
 
-.App-link {
-  color: #61dafb;
+/* Prevent horizontal scroll on mobile */
+@media (max-width: 768px) {
+  .row {
+    margin-right: 0;
+    margin-left: 0;
+  }
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+/* Column Base */
+[class*="col-"] {
+  position: relative;
+  width: 100%;
+  padding-right: 15px;
+  padding-left: 15px;
+}
+
+/* Mobile first approach */
+.col-12 { flex: 0 0 100%; max-width: 100%; }
+.col-11 { flex: 0 0 91.666667%; max-width: 91.666667%; }
+.col-10 { flex: 0 0 83.333333%; max-width: 83.333333%; }
+.col-9 { flex: 0 0 75%; max-width: 75%; }
+.col-8 { flex: 0 0 66.666667%; max-width: 66.666667%; }
+.col-7 { flex: 0 0 58.333333%; max-width: 58.333333%; }
+.col-6 { flex: 0 0 50%; max-width: 50%; }
+.col-5 { flex: 0 0 41.666667%; max-width: 41.666667%; }
+.col-4 { flex: 0 0 33.333333%; max-width: 33.333333%; }
+.col-3 { flex: 0 0 25%; max-width: 25%; }
+.col-2 { flex: 0 0 16.666667%; max-width: 16.666667%; }
+.col-1 { flex: 0 0 8.333333%; max-width: 8.333333%; }
+
+/* Small devices (576px and up) */
+@media (min-width: 576px) {
+  .col-sm-12 { flex: 0 0 100%; max-width: 100%; }
+  .col-sm-11 { flex: 0 0 91.666667%; max-width: 91.666667%; }
+  .col-sm-10 { flex: 0 0 83.333333%; max-width: 83.333333%; }
+  .col-sm-9 { flex: 0 0 75%; max-width: 75%; }
+  .col-sm-8 { flex: 0 0 66.666667%; max-width: 66.666667%; }
+  .col-sm-7 { flex: 0 0 58.333333%; max-width: 58.333333%; }
+  .col-sm-6 { flex: 0 0 50%; max-width: 50%; }
+  .col-sm-5 { flex: 0 0 41.666667%; max-width: 41.666667%; }
+  .col-sm-4 { flex: 0 0 33.333333%; max-width: 33.333333%; }
+  .col-sm-3 { flex: 0 0 25%; max-width: 25%; }
+  .col-sm-2 { flex: 0 0 16.666667%; max-width: 16.666667%; }
+  .col-sm-1 { flex: 0 0 8.333333%; max-width: 8.333333%; }
+}
+
+/* Medium devices (768px and up) */
+@media (min-width: 768px) {
+  .col-md-12 { flex: 0 0 100%; max-width: 100%; }
+  .col-md-11 { flex: 0 0 91.666667%; max-width: 91.666667%; }
+  .col-md-10 { flex: 0 0 83.333333%; max-width: 83.333333%; }
+  .col-md-9 { flex: 0 0 75%; max-width: 75%; }
+  .col-md-8 { flex: 0 0 66.666667%; max-width: 66.666667%; }
+  .col-md-7 { flex: 0 0 58.333333%; max-width: 58.333333%; }
+  .col-md-6 { flex: 0 0 50%; max-width: 50%; }
+  .col-md-5 { flex: 0 0 41.666667%; max-width: 41.666667%; }
+  .col-md-4 { flex: 0 0 33.333333%; max-width: 33.333333%; }
+  .col-md-3 { flex: 0 0 25%; max-width: 25%; }
+  .col-md-2 { flex: 0 0 16.666667%; max-width: 16.666667%; }
+  .col-md-1 { flex: 0 0 8.333333%; max-width: 8.333333%; }
+}
+
+/* Large devices (992px and up) */
+@media (min-width: 992px) {
+  .col-lg-12 { flex: 0 0 100%; max-width: 100%; }
+  .col-lg-11 { flex: 0 0 91.666667%; max-width: 91.666667%; }
+  .col-lg-10 { flex: 0 0 83.333333%; max-width: 83.333333%; }
+  .col-lg-9 { flex: 0 0 75%; max-width: 75%; }
+  .col-lg-8 { flex: 0 0 66.666667%; max-width: 66.666667%; }
+  .col-lg-7 { flex: 0 0 58.333333%; max-width: 58.333333%; }
+  .col-lg-6 { flex: 0 0 50%; max-width: 50%; }
+  .col-lg-5 { flex: 0 0 41.666667%; max-width: 41.666667%; }
+  .col-lg-4 { flex: 0 0 33.333333%; max-width: 33.333333%; }
+  .col-lg-3 { flex: 0 0 25%; max-width: 25%; }
+  .col-lg-2 { flex: 0 0 16.666667%; max-width: 16.666667%; }
+  .col-lg-1 { flex: 0 0 8.333333%; max-width: 8.333333%; }
+}
+
+/* Extra large devices (1200px and up) */
+@media (min-width: 1200px) {
+  .col-xl-12 { flex: 0 0 100%; max-width: 100%; }
+  .col-xl-11 { flex: 0 0 91.666667%; max-width: 91.666667%; }
+  .col-xl-10 { flex: 0 0 83.333333%; max-width: 83.333333%; }
+  .col-xl-9 { flex: 0 0 75%; max-width: 75%; }
+  .col-xl-8 { flex: 0 0 66.666667%; max-width: 66.666667%; }
+  .col-xl-7 { flex: 0 0 58.333333%; max-width: 58.333333%; }
+  .col-xl-6 { flex: 0 0 50%; max-width: 50%; }
+  .col-xl-5 { flex: 0 0 41.666667%; max-width: 41.666667%; }
+  .col-xl-4 { flex: 0 0 33.333333%; max-width: 33.333333%; }
+  .col-xl-3 { flex: 0 0 25%; max-width: 25%; }
+  .col-xl-2 { flex: 0 0 16.666667%; max-width: 16.666667%; }
+  .col-xl-1 { flex: 0 0 8.333333%; max-width: 8.333333%; }
+}
+
+/* Utility Classes */
+.text-center { text-align: center !important; }
+.text-left { text-align: left !important; }
+.text-right { text-align: right !important; }
+
+.mx-auto { margin-left: auto !important; margin-right: auto !important; }
+.my-auto { margin-top: auto !important; margin-bottom: auto !important; }
+
+.d-none { display: none !important; }
+.d-block { display: block !important; }
+.d-flex { display: flex !important; }
+.d-inline { display: inline !important; }
+.d-inline-block { display: inline-block !important; }
+
+/* Mobile Utilities */
+@media (max-width: 767px) {
+  .d-mobile-none { display: none !important; }
+  .d-mobile-block { display: block !important; }
+  .text-mobile-center { text-align: center !important; }
+}
+
+/* Desktop Utilities */
+@media (min-width: 768px) {
+  .d-desktop-none { display: none !important; }
+  .d-desktop-block { display: block !important; }
+}
+
+/* Buttons */
+button {
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* Forms */
+input,
+textarea,
+select {
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Mobile Specific Fixes */
+@media (max-width: 768px) {
+  /* Reduce padding on mobile */
+  [class*="col-"] {
+    padding-right: 10px;
+    padding-left: 10px;
   }
-  to {
-    transform: rotate(360deg);
+  
+  .container {
+    padding-right: 10px;
+    padding-left: 10px;
   }
+  
+  /* Typography adjustments */
+  h1 { font-size: 2rem; }
+  h2 { font-size: 1.75rem; }
+  h3 { font-size: 1.5rem; }
+  h4 { font-size: 1.25rem; }
+  h5 { font-size: 1.1rem; }
+  h6 { font-size: 1rem; }
+  
+  /* Prevent horizontal scroll */
+  body, html {
+    overflow-x: hidden !important;
+  }
+  
+  /* Fix images */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* Fix tables */
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  
+  /* Ensure full width elements */
+  .App {
+    width: 100vw;
+    max-width: 100%;
+  }
+}
+
+/* Very Small Devices */
+@media (max-width: 576px) {
+  body {
+    font-size: 14px;
+  }
+  
+  .container {
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+  
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.5rem; }
+  h3 { font-size: 1.25rem; }
+  h4 { font-size: 1.1rem; }
+  h5 { font-size: 1rem; }
+  h6 { font-size: 0.9rem; }
+}
+
+/* iOS Specific Fixes */
+@supports (-webkit-touch-callout: none) {
+  /* Prevent iOS button styling */
+  button,
+  input[type="submit"],
+  input[type="button"] {
+    -webkit-appearance: none;
+    border-radius: 0;
+  }
+  
+  /* Fix iOS input zoom */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="date"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* Safe area insets for notched devices */
+@supports (padding: max(0px)) {
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .App {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #f59e0b;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Ensure no horizontal overflow */
+* {
+  max-width: 100%;
+}
+
+/* Fix for absolute positioned elements */
+[style*="position: absolute"] {
+  max-width: 100vw;
+}
+
+/* Prevent wide code blocks */
+pre, code {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+/* Responsive images */
+img, video, iframe {
+  max-width: 100%;
+  height: auto;
 }

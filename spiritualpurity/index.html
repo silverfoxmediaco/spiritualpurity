@@ -3,7 +3,15 @@
   <head>
     <meta charset="utf-8" />
     <link rel="icon" href="/SPfaviconv2.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    
+    <!-- CRITICAL: Proper viewport meta tag for mobile responsiveness -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+    
+    <!-- iOS specific meta tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="format-detection" content="telephone=no" />
+    
     <meta name="theme-color" content="#404040" />
     
     <!-- Primary Meta Tags -->
@@ -46,8 +54,6 @@
     <!-- Additional Meta Tags -->
     <meta name="application-name" content="Spiritual Purity" />
     <meta name="apple-mobile-web-app-title" content="Spiritual Purity" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="mobile-web-app-capable" content="yes" />
     
     <!-- Apple Touch Icons -->
@@ -57,13 +63,72 @@
     <link rel="manifest" href="/manifest.json" />
     
     <!-- Preconnect to external domains for performance -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
     
     <!-- Font and Icon imports -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    
+    <!-- Prevent zoom on input focus on iOS -->
+    <style>
+      /* Critical mobile fixes */
+      * {
+        box-sizing: border-box;
+      }
+      
+      html {
+        width: 100%;
+        overflow-x: hidden;
+        -webkit-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
+      }
+      
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        overflow-x: hidden;
+        min-height: 100vh;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      
+      #root {
+        width: 100%;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+      
+      /* Prevent iOS zoom on input focus */
+      @media screen and (-webkit-min-device-pixel-ratio: 0) {
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="number"],
+        input[type="tel"],
+        input[type="date"],
+        input[type="datetime-local"],
+        input[type="month"],
+        input[type="time"],
+        input[type="url"],
+        input[type="search"],
+        textarea,
+        select {
+          font-size: 16px !important;
+        }
+      }
+      
+      /* Safe area insets for notched devices */
+      @supports (padding: max(0px)) {
+        body {
+          padding-top: env(safe-area-inset-top);
+          padding-left: env(safe-area-inset-left);
+          padding-right: env(safe-area-inset-right);
+        }
+      }
+    </style>
     
     <!-- Structured Data for Rich Snippets -->
     <script type="application/ld+json">
