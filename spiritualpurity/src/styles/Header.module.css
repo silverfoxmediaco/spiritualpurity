@@ -266,7 +266,7 @@
 }
 
 /* Responsive Design */
-@media (max-width: 1200px) {
+@media (max-width: 768px) {
   .headerContainer {
     grid-template-columns: 1fr auto;
     gap: 1rem;
