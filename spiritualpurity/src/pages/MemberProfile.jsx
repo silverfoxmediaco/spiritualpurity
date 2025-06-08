@@ -1,6 +1,7 @@
 // src/pages/MemberProfile.jsx
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ProfileMessages from '../components/ProfileMessages';
@@ -9,10 +10,14 @@ import API_CONFIG from '../config/api';
 import styles from '../styles/MemberProfile.module.css';
 
 const MemberProfile = () => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [connections, setConnections] = useState([]);
+  const [loadingConnections, setLoadingConnections] = useState(false);
+  const [activeTab, setActiveTab] = useState('posts'); // Add tab state
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -44,6 +49,7 @@ const MemberProfile = () => {
   // Load user profile on component mount
   useEffect(() => {
     fetchUserProfile();
+    fetchUserConnections();
   }, []);
 
   const fetchUserProfile = async () => {
@@ -97,6 +103,31 @@ const MemberProfile = () => {
       setError('Network error. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Fetch user connections
+  const fetchUserConnections = async () => {
+    try {
+      setLoadingConnections(true);
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/connections/my-connections`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setConnections(data.data.connections || []);
+      }
+    } catch (error) {
+      console.error('Error fetching connections:', error);
+    } finally {
+      setLoadingConnections(false);
     }
   };
 
@@ -252,6 +283,42 @@ const MemberProfile = () => {
       console.error('Prayer update error:', error);
       setError('Network error. Please try again.');
     }
+  };
+
+  // Handle removing a connection
+  const handleRemoveConnection = async (connectionId) => {
+    if (!window.confirm('Are you sure you want to remove this connection?')) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/connections/${connectionId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Refresh connections list
+        fetchUserConnections();
+        alert('Connection removed successfully');
+      } else {
+        alert(data.message || 'Failed to remove connection');
+      }
+    } catch (error) {
+      console.error('Error removing connection:', error);
+      alert('Failed to remove connection. Please try again.');
+    }
+  };
+
+  // Navigate to a connection's profile
+  const handleViewProfile = (userId) => {
+    navigate(`/member/${userId}`);
   };
 
   // Helper function to get the correct image URL
@@ -582,109 +649,224 @@ const MemberProfile = () => {
                   /* View Mode */
                   <div className={styles.profileView}>
                     
-                    {/* Posts Section - NEW: Added at the top */}
-                    <UserPosts 
-                      userId={user._id} 
-                      isOwnProfile={true} 
-                      currentUser={user} 
-                    />
-                    
-                    {/* Bio Section */}
-                    {user?.bio && (
-                      <div className={styles.profileSection}>
-                        <h3>About Me</h3>
-                        <p>{user.bio}</p>
-                      </div>
-                    )}
-
-                    {/* Testimony Section */}
-                    {user?.testimony && user?.privacy?.showTestimony && (
-                      <div className={styles.profileSection}>
-                        <h3>My Testimony</h3>
-                        <p>{user.testimony}</p>
-                      </div>
-                    )}
-
-                    {/* Favorite Verse Section */}
-                    {user?.favoriteVerse?.verse && (
-                      <div className={styles.profileSection}>
-                        <h3>Favorite Bible Verse</h3>
-                        <blockquote className={styles.verseQuote}>
-                          "{user.favoriteVerse.verse}"
-                          {user.favoriteVerse.reference && (
-                            <cite>— {user.favoriteVerse.reference}</cite>
-                          )}
-                        </blockquote>
-                      </div>
-                    )}
-
-                    {/* Prayer Requests Section */}
-                    <div className={styles.profileSection}>
-                      <h3>Prayer Requests</h3>
-                      
-                      {/* Add New Prayer Request */}
-                      <form onSubmit={handleAddPrayerRequest} className={styles.prayerForm}>
-                        <div className={styles.formGroup}>
-                          <textarea
-                            value={newPrayerRequest}
-                            onChange={(e) => setNewPrayerRequest(e.target.value)}
-                            placeholder="Share a prayer request..."
-                            rows="3"
-                            required
-                          />
-                        </div>
-                        <div className={styles.prayerOptions}>
-                          <label className={styles.checkboxLabel}>
-                            <input
-                              type="checkbox"
-                              checked={isPrivatePrayer}
-                              onChange={(e) => setIsPrivatePrayer(e.target.checked)}
-                            />
-                            Private prayer request (only visible to you)
-                          </label>
-                          <button type="submit" className={styles.addPrayerButton}>
-                            Add Prayer Request
-                          </button>
-                        </div>
-                      </form>
-
-                      {/* Prayer Requests List */}
-                      <div className={styles.prayerRequests}>
-                        {user?.prayerRequests?.length > 0 ? (
-                          user.prayerRequests.map((prayer) => (
-                            <div key={prayer._id} className={`${styles.prayerRequest} ${prayer.isAnswered ? styles.answered : ''}`}>
-                              <div className={styles.prayerContent}>
-                                <p>{prayer.request}</p>
-                                <div className={styles.prayerMeta}>
-                                  <span className={styles.prayerDate}>
-                                    {new Date(prayer.createdAt).toLocaleDateString()}
-                                  </span>
-                                  {prayer.isPrivate && (
-                                    <span className={styles.privateTag}>Private</span>
-                                  )}
-                                  {prayer.isAnswered && (
-                                    <span className={styles.answeredTag}>Answered</span>
-                                  )}
-                                </div>
-                              </div>
-                              {!prayer.isAnswered && (
-                                <button
-                                  onClick={() => handleMarkPrayerAnswered(prayer._id)}
-                                  className={styles.markAnsweredButton}
-                                >
-                                  Mark as Answered
-                                </button>
-                              )}
-                            </div>
-                          ))
-                        ) : (
-                          <p className={styles.noPrayers}>No prayer requests yet. Share your first prayer request above!</p>
-                        )}
-                      </div>
+                    {/* Tab Navigation */}
+                    <div className={styles.profileTabs}>
+                      <button 
+                        className={`${styles.tabButton} ${activeTab === 'posts' ? styles.activeTab : ''}`}
+                        onClick={() => setActiveTab('posts')}
+                      >
+                        <span className="material-icons">photo_library</span>
+                        Posts
+                      </button>
+                      <button 
+                        className={`${styles.tabButton} ${activeTab === 'connections' ? styles.activeTab : ''}`}
+                        onClick={() => setActiveTab('connections')}
+                      >
+                        <span className="material-icons">people</span>
+                        Connections ({connections.length})
+                      </button>
+                      <button 
+                        className={`${styles.tabButton} ${activeTab === 'about' ? styles.activeTab : ''}`}
+                        onClick={() => setActiveTab('about')}
+                      >
+                        <span className="material-icons">info</span>
+                        About
+                      </button>
                     </div>
 
-                    {/* Messages Section */}
-                    <ProfileMessages currentUser={user} />
+                    {/* Tab Content */}
+                    {activeTab === 'posts' && (
+                      <div>
+                        <UserPosts 
+                          userId={user._id} 
+                          isOwnProfile={true} 
+                          currentUser={user} 
+                        />
+                      </div>
+                    )}
+
+                    {activeTab === 'connections' && (
+                      <div className={styles.connectionsSection}>
+                        <h3>
+                          <span className="material-icons">people</span>
+                          My Connections
+                        </h3>
+                        
+                        {loadingConnections ? (
+                          <div className={styles.loadingState}>
+                            <div className={styles.spinner}></div>
+                            <p>Loading connections...</p>
+                          </div>
+                        ) : connections.length === 0 ? (
+                          <div className={styles.noConnections}>
+                            <span className="material-icons">person_add</span>
+                            <p>You haven't made any connections yet.</p>
+                            <button 
+                              onClick={() => navigate('/members')}
+                              className={styles.findConnectionsButton}
+                            >
+                              Find Members to Connect With
+                            </button>
+                          </div>
+                        ) : (
+                          <div className={styles.connectionsGrid}>
+                            {connections.map((connection) => (
+                              <div key={connection._id} className={styles.connectionCard}>
+                                <div className={styles.connectionAvatar}>
+                                  {connection.profilePicture ? (
+                                    <img 
+                                      src={getProfileImageUrl(connection.profilePicture)}
+                                      alt={`${connection.firstName} ${connection.lastName}`}
+                                      onClick={() => handleViewProfile(connection._id)}
+                                    />
+                                  ) : (
+                                    <div 
+                                      className={styles.defaultConnectionAvatar}
+                                      onClick={() => handleViewProfile(connection._id)}
+                                    >
+                                      <span className="material-icons">person</span>
+                                    </div>
+                                  )}
+                                </div>
+                                
+                                <div className={styles.connectionInfo}>
+                                  <h4 onClick={() => handleViewProfile(connection._id)}>
+                                    {connection.firstName} {connection.lastName}
+                                  </h4>
+                                  {connection.location && (
+                                    <p className={styles.connectionLocation}>
+                                      <span className="material-icons">location_on</span>
+                                      {[connection.location.city, connection.location.state].filter(Boolean).join(', ')}
+                                    </p>
+                                  )}
+                                  <p className={styles.connectionDate}>
+                                    Connected since {new Date(connection.connectedAt).toLocaleDateString()}
+                                  </p>
+                                </div>
+                                
+                                <div className={styles.connectionActions}>
+                                  <button 
+                                    className={styles.viewProfileButton}
+                                    onClick={() => handleViewProfile(connection._id)}
+                                  >
+                                    <span className="material-icons">person</span>
+                                    View Profile
+                                  </button>
+                                  <button 
+                                    className={styles.removeConnectionButton}
+                                    onClick={() => handleRemoveConnection(connection.connectionId)}
+                                  >
+                                    <span className="material-icons">person_remove</span>
+                                    Remove
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {activeTab === 'about' && (
+                      <div>
+                        {/* Bio Section */}
+                        {user?.bio && (
+                          <div className={styles.profileSection}>
+                            <h3>About Me</h3>
+                            <p>{user.bio}</p>
+                          </div>
+                        )}
+
+                        {/* Testimony Section */}
+                        {user?.testimony && user?.privacy?.showTestimony && (
+                          <div className={styles.profileSection}>
+                            <h3>My Testimony</h3>
+                            <p>{user.testimony}</p>
+                          </div>
+                        )}
+
+                        {/* Favorite Verse Section */}
+                        {user?.favoriteVerse?.verse && (
+                          <div className={styles.profileSection}>
+                            <h3>Favorite Bible Verse</h3>
+                            <blockquote className={styles.verseQuote}>
+                              "{user.favoriteVerse.verse}"
+                              {user.favoriteVerse.reference && (
+                                <cite>— {user.favoriteVerse.reference}</cite>
+                              )}
+                            </blockquote>
+                          </div>
+                        )}
+
+                        {/* Prayer Requests Section */}
+                        <div className={styles.profileSection}>
+                          <h3>Prayer Requests</h3>
+                          
+                          {/* Add New Prayer Request */}
+                          <form onSubmit={handleAddPrayerRequest} className={styles.prayerForm}>
+                            <div className={styles.formGroup}>
+                              <textarea
+                                value={newPrayerRequest}
+                                onChange={(e) => setNewPrayerRequest(e.target.value)}
+                                placeholder="Share a prayer request..."
+                                rows="3"
+                                required
+                              />
+                            </div>
+                            <div className={styles.prayerOptions}>
+                              <label className={styles.checkboxLabel}>
+                                <input
+                                  type="checkbox"
+                                  checked={isPrivatePrayer}
+                                  onChange={(e) => setIsPrivatePrayer(e.target.checked)}
+                                />
+                                Private prayer request (only visible to you)
+                              </label>
+                              <button type="submit" className={styles.addPrayerButton}>
+                                Add Prayer Request
+                              </button>
+                            </div>
+                          </form>
+
+                          {/* Prayer Requests List */}
+                          <div className={styles.prayerRequests}>
+                            {user?.prayerRequests?.length > 0 ? (
+                              user.prayerRequests.map((prayer) => (
+                                <div key={prayer._id} className={`${styles.prayerRequest} ${prayer.isAnswered ? styles.answered : ''}`}>
+                                  <div className={styles.prayerContent}>
+                                    <p>{prayer.request}</p>
+                                    <div className={styles.prayerMeta}>
+                                      <span className={styles.prayerDate}>
+                                        {new Date(prayer.createdAt).toLocaleDateString()}
+                                      </span>
+                                      {prayer.isPrivate && (
+                                        <span className={styles.privateTag}>Private</span>
+                                      )}
+                                      {prayer.isAnswered && (
+                                        <span className={styles.answeredTag}>Answered</span>
+                                      )}
+                                    </div>
+                                  </div>
+                                  {!prayer.isAnswered && (
+                                    <button
+                                      onClick={() => handleMarkPrayerAnswered(prayer._id)}
+                                      className={styles.markAnsweredButton}
+                                    >
+                                      Mark as Answered
+                                    </button>
+                                  )}
+                                </div>
+                              ))
+                            ) : (
+                              <p className={styles.noPrayers}>No prayer requests yet. Share your first prayer request above!</p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Messages Section */}
+                        <ProfileMessages currentUser={user} />
+                      </div>
+                    )}
 
                   </div>
                 )}

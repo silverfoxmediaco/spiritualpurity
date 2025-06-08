@@ -531,8 +531,299 @@
   margin: 0;
 }
 
+.profileTabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.tabButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #6b7280;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tabButton:hover {
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.tabButton.activeTab {
+  color: #f59e0b;
+  border-bottom-color: #f59e0b;
+}
+
+.tabButton .material-icons {
+  font-size: 20px;
+}
+
+/* Connections Section */
+.connectionsSection {
+  margin-top: 2rem;
+}
+
+.connectionsSection h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #404040;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem;
+  color: #6b7280;
+}
+
+.noConnections {
+  text-align: center;
+  padding: 3rem;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.noConnections .material-icons {
+  font-size: 4rem;
+  color: #d1d5db;
+  margin-bottom: 1rem;
+}
+
+.noConnections p {
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+}
+
+.findConnectionsButton {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.findConnectionsButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+/* Connections Grid */
+.connectionsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.connectionCard {
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.3s ease;
+}
+
+.connectionCard:hover {
+  border-color: #f59e0b;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.1);
+}
+
+.connectionAvatar {
+  flex-shrink: 0;
+}
+
+.connectionAvatar img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.connectionAvatar img:hover {
+  transform: scale(1.05);
+}
+
+.defaultConnectionAvatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.defaultConnectionAvatar:hover {
+  transform: scale(1.05);
+}
+
+.defaultConnectionAvatar .material-icons {
+  color: white;
+  font-size: 28px;
+}
+
+.connectionInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.connectionInfo h4 {
+  color: #404040;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem 0;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.connectionInfo h4:hover {
+  color: #f59e0b;
+}
+
+.connectionLocation {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #6b7280;
+  font-size: 0.85rem;
+  margin: 0 0 0.25rem 0;
+}
+
+.connectionLocation .material-icons {
+  font-size: 14px;
+}
+
+.connectionDate {
+  color: #9ca3af;
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+.connectionActions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.viewProfileButton,
+.removeConnectionButton {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.viewProfileButton {
+  background: #f59e0b;
+  color: white;
+}
+
+.viewProfileButton:hover {
+  background: #d97706;
+}
+
+.removeConnectionButton {
+  background: transparent;
+  color: #dc2626;
+  border: 1px solid #dc2626;
+}
+
+.removeConnectionButton:hover {
+  background: #dc2626;
+  color: white;
+}
+
+.viewProfileButton .material-icons,
+.removeConnectionButton .material-icons {
+  font-size: 16px;
+}
+
 /* Responsive Design - Including Header Width Fix */
 @media (max-width: 768px) {
+  .profileTabs {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .tabButton {
+    flex: 1;
+    min-width: 0;
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  .tabButton .material-icons {
+    font-size: 18px;
+  }
+
+  .connectionsGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .connectionCard {
+    padding: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .connectionAvatar img,
+  .defaultConnectionAvatar {
+    width: 50px;
+    height: 50px;
+  }
+
+  .connectionInfo h4 {
+    font-size: 1rem;
+  }
+
+  .connectionActions {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+  }
+
+  .viewProfileButton,
+  .removeConnectionButton {
+    flex: 1;
+    justify-content: center;
+    font-size: 0.8rem;
+    padding: 0.5rem 0.75rem;
+  }
+  
   .memberProfilePage {
     padding: 0;
     width: 100%;
