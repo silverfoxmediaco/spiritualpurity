@@ -26,6 +26,17 @@ uploadDirs.forEach(dir => {
   }
 });
 
+// Security Headers Middleware
+app.use((req, res, next) => {
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+  next();
+});
+
 // CORS Configuration - Fixed for production
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
@@ -36,8 +47,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-app.use('/api/admin', require('./routes/admin'));
-
+// Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -87,6 +97,16 @@ async function createDatabaseIndexes() {
     await db.collection('connections').createIndex({ recipient: 1, status: 1 });
     await db.collection('connections').createIndex({ requester: 1, status: 1 });
     
+    // Post indexes
+    await db.collection('posts').createIndex({ author: 1, createdAt: -1 });
+    await db.collection('posts').createIndex({ visibility: 1, createdAt: -1 });
+    await db.collection('posts').createIndex({ tags: 1 });
+    
+    // Prayer indexes
+    await db.collection('prayers').createIndex({ userId: 1, createdAt: -1 });
+    await db.collection('prayers').createIndex({ isAnswered: 1, createdAt: -1 });
+    await db.collection('prayers').createIndex({ category: 1 });
+    
     console.log('Database indexes created successfully');
   } catch (error) {
     console.error('Error creating indexes:', error);
@@ -111,7 +131,7 @@ const routesToLoad = [
   { path: '/api/connections', file: './routes/connections' },
   { path: '/api/posts', file: './routes/posts' },
   { path: '/api/prayers', file: './routes/prayers' },
-  { path: '/api/admin', file: './routes/admin' }, 
+  { path: '/api/admin', file: './routes/admin' },
   { path: '/api/advertisers', file: './routes/advertisers' }
 ];
 
