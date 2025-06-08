@@ -4,7 +4,7 @@
   font-family: 'Poppins', sans-serif;
   min-height: 100vh;
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  padding: 20px 0;
+  padding: 0px 0;
 }
 
 /* Loading State */
@@ -121,39 +121,7 @@
   box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
 }
 
-/* Breadcrumb */
-.breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 20px;
-  font-size: 14px;
-}
 
-.breadcrumbLink {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: none;
-  border: none;
-  color: #6b7280;
-  cursor: pointer;
-  font-family: 'Poppins', sans-serif;
-  transition: color 0.3s ease;
-}
-
-.breadcrumbLink:hover {
-  color: #f59e0b;
-}
-
-.breadcrumbSeparator {
-  color: #9ca3af;
-}
-
-.breadcrumbCurrent {
-  color: #404040;
-  font-weight: 500;
-}
 
 /* Profile Container */
 .profileContainer {
