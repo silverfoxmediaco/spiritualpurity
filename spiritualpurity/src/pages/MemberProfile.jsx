@@ -791,6 +791,72 @@ const MemberProfile = () => {
                       </div>
                     )}
 
+                    {activeTab === 'prayers' && (
+                      <div className={styles.profileSection}>
+                        <h3>Prayer Requests</h3>
+                        
+                        {/* Add New Prayer Request */}
+                        <form onSubmit={handleAddPrayerRequest} className={styles.prayerForm}>
+                          <div className={styles.formGroup}>
+                            <textarea
+                              value={newPrayerRequest}
+                              onChange={(e) => setNewPrayerRequest(e.target.value)}
+                              placeholder="Share a prayer request..."
+                              rows="3"
+                              required
+                            />
+                          </div>
+                          <div className={styles.prayerOptions}>
+                            <label className={styles.checkboxLabel}>
+                              <input
+                                type="checkbox"
+                                checked={isPrivatePrayer}
+                                onChange={(e) => setIsPrivatePrayer(e.target.checked)}
+                              />
+                              Private prayer request (only visible to you)
+                            </label>
+                            <button type="submit" className={styles.addPrayerButton}>
+                              Add Prayer Request
+                            </button>
+                          </div>
+                        </form>
+
+                        {/* Prayer Requests List */}
+                        <div className={styles.prayerRequests}>
+                          {user?.prayerRequests?.length > 0 ? (
+                            user.prayerRequests.map((prayer) => (
+                              <div key={prayer._id} className={`${styles.prayerRequest} ${prayer.isAnswered ? styles.answered : ''}`}>
+                                <div className={styles.prayerContent}>
+                                  <p>{prayer.request}</p>
+                                  <div className={styles.prayerMeta}>
+                                    <span className={styles.prayerDate}>
+                                      {new Date(prayer.createdAt).toLocaleDateString()}
+                                    </span>
+                                    {prayer.isPrivate && (
+                                      <span className={styles.privateTag}>Private</span>
+                                    )}
+                                    {prayer.isAnswered && (
+                                      <span className={styles.answeredTag}>Answered</span>
+                                    )}
+                                  </div>
+                                </div>
+                                {!prayer.isAnswered && (
+                                  <button
+                                    onClick={() => handleMarkPrayerAnswered(prayer._id)}
+                                    className={styles.markAnsweredButton}
+                                  >
+                                    Mark as Answered
+                                  </button>
+                                )}
+                              </div>
+                            ))
+                          ) : (
+                            <p className={styles.noPrayers}>No prayer requests yet. Share your first prayer request above!</p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
                     {activeTab === 'about' && (
                       <div>
                         {/* Bio Section */}
@@ -821,71 +887,6 @@ const MemberProfile = () => {
                             </blockquote>
                           </div>
                         )}
-
-                        {/* Prayer Requests Section */}
-                        <div className={styles.profileSection}>
-                          <h3>Prayer Requests</h3>
-                          
-                          {/* Add New Prayer Request */}
-                          <form onSubmit={handleAddPrayerRequest} className={styles.prayerForm}>
-                            <div className={styles.formGroup}>
-                              <textarea
-                                value={newPrayerRequest}
-                                onChange={(e) => setNewPrayerRequest(e.target.value)}
-                                placeholder="Share a prayer request..."
-                                rows="3"
-                                required
-                              />
-                            </div>
-                            <div className={styles.prayerOptions}>
-                              <label className={styles.checkboxLabel}>
-                                <input
-                                  type="checkbox"
-                                  checked={isPrivatePrayer}
-                                  onChange={(e) => setIsPrivatePrayer(e.target.checked)}
-                                />
-                                Private prayer request (only visible to you)
-                              </label>
-                              <button type="submit" className={styles.addPrayerButton}>
-                                Add Prayer Request
-                              </button>
-                            </div>
-                          </form>
-
-                          {/* Prayer Requests List */}
-                          <div className={styles.prayerRequests}>
-                            {user?.prayerRequests?.length > 0 ? (
-                              user.prayerRequests.map((prayer) => (
-                                <div key={prayer._id} className={`${styles.prayerRequest} ${prayer.isAnswered ? styles.answered : ''}`}>
-                                  <div className={styles.prayerContent}>
-                                    <p>{prayer.request}</p>
-                                    <div className={styles.prayerMeta}>
-                                      <span className={styles.prayerDate}>
-                                        {new Date(prayer.createdAt).toLocaleDateString()}
-                                      </span>
-                                      {prayer.isPrivate && (
-                                        <span className={styles.privateTag}>Private</span>
-                                      )}
-                                      {prayer.isAnswered && (
-                                        <span className={styles.answeredTag}>Answered</span>
-                                      )}
-                                    </div>
-                                  </div>
-                                  {!prayer.isAnswered && (
-                                    <button
-                                      onClick={() => handleMarkPrayerAnswered(prayer._id)}
-                                      className={styles.markAnsweredButton}
-                                    >
-                                      Mark as Answered
-                                    </button>
-                                  )}
-                                </div>
-                              ))
-                            ) : (
-                              <p className={styles.noPrayers}>No prayer requests yet. Share your first prayer request above!</p>
-                            )}
-                          </div>
-                        </div>
                       </div>
                     )}
 
