@@ -677,6 +677,13 @@ const MemberProfile = () => {
                         Messages
                       </button>
                       <button 
+                        className={`${styles.tabButton} ${activeTab === 'prayers' ? styles.activeTab : ''}`}
+                        onClick={() => setActiveTab('prayers')}
+                      >
+                        <span className="material-icons">volunteer_activism</span>
+                        Prayers
+                      </button>
+                      <button 
                         className={`${styles.tabButton} ${activeTab === 'about' ? styles.activeTab : ''}`}
                         onClick={() => setActiveTab('about')}
                       >
