@@ -91,7 +91,7 @@ const Header = () => {
               <li><Link to="/community">Community</Link></li>
               <li><Link to="/prayer">Prayer</Link></li>
               <li><Link to="/resources">Resources</Link></li>
-              <li><Link to="/about">About</Link></li>
+              
             </ul>
           </nav>
           
@@ -142,7 +142,7 @@ const Header = () => {
                 <li><Link to="/community" onClick={closeMenu}>Community</Link></li>
                 <li><Link to="/prayer" onClick={closeMenu}>Prayer</Link></li>
                 <li><Link to="/resources" onClick={closeMenu}>Resources</Link></li>
-                <li><Link to="/about" onClick={closeMenu}>About</Link></li>
+                
               </ul>
             </nav>
             
