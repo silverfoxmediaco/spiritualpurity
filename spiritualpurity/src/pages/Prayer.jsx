@@ -4,7 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import API_CONFIG from '../config/api';
 import styles from '../styles/Prayer.module.css';
+
 
 const Prayer = () => {
   const [prayerRequests, setPrayerRequests] = useState([]);
