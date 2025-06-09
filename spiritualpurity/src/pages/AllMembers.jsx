@@ -16,6 +16,7 @@ const AllMembers = () => {
   const [filterRelationship, setFilterRelationship] = useState('');
   const [sortBy, setSortBy] = useState('newest');
   const [connectionStatuses, setConnectionStatuses] = useState({});
+  const [connectionRequests, setConnectionRequests] = useState({}); // NEW: Store connection requests
   const [actionLoading, setActionLoading] = useState({});
   const navigate = useNavigate();
 
@@ -38,6 +39,7 @@ const AllMembers = () => {
         const token = localStorage.getItem('token');
         if (token) {
           fetchConnectionStatuses(data.data.members);
+          fetchReceivedConnectionRequests(); // NEW: Fetch received requests
         }
       } else {
         setError('Failed to load members');
@@ -47,6 +49,31 @@ const AllMembers = () => {
       setError('Network error loading members');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // NEW: Fetch received connection requests to get connection IDs
+  const fetchReceivedConnectionRequests = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/connections/requests`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        // Map requests by requester ID for easy lookup
+        const requestsMap = {};
+        data.data.requests.forEach(request => {
+          requestsMap[request.requester._id] = request;
+        });
+        setConnectionRequests(requestsMap);
+      }
+    } catch (error) {
+      console.error('Error fetching connection requests:', error);
     }
   };
 
@@ -135,7 +162,8 @@ const AllMembers = () => {
     navigate(`/member/${memberId}`);
   };
 
-  const handleConnect = async (memberId, memberName) => {
+  // UPDATED: Handle both sending and accepting connections
+  const handleConnectionAction = async (memberId, memberName) => {
     const token = localStorage.getItem('token');
     if (!token) {
       alert('Please log in to connect with members');
@@ -143,10 +171,13 @@ const AllMembers = () => {
     }
 
     const currentStatus = connectionStatuses[memberId];
+    
+    // Handle different connection states
     if (currentStatus === 'connected') {
       alert('You are already connected with this member');
       return;
     }
+    
     if (currentStatus === 'sent') {
       alert('Connection request already sent');
       return;
@@ -155,31 +186,61 @@ const AllMembers = () => {
     setActionLoading(prev => ({ ...prev, [memberId]: 'connect' }));
 
     try {
-      const response = await fetch(`${API_CONFIG.BASE_URL}/api/connections/send-request`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          recipientId: memberId,
-          message: `Hi ${memberName}, I'd like to connect with you on our faith journey!`
-        }),
-      });
+      // If we have a received request, accept it
+      if (currentStatus === 'received' && connectionRequests[memberId]) {
+        const connectionId = connectionRequests[memberId]._id;
+        const response = await fetch(`${API_CONFIG.BASE_URL}/api/connections/${connectionId}/accept`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
 
-      const data = await response.json();
-      if (data.success) {
-        setConnectionStatuses(prev => ({
-          ...prev,
-          [memberId]: 'sent'
-        }));
-        alert(`Connection request sent to ${memberName}!`);
+        const data = await response.json();
+        if (data.success) {
+          setConnectionStatuses(prev => ({
+            ...prev,
+            [memberId]: 'connected'
+          }));
+          // Remove from connection requests
+          setConnectionRequests(prev => {
+            const updated = { ...prev };
+            delete updated[memberId];
+            return updated;
+          });
+          alert(`You are now connected with ${memberName}!`);
+        } else {
+          alert(data.message || 'Failed to accept connection request');
+        }
       } else {
-        alert(data.message || 'Failed to send connection request');
+        // Otherwise, send a new connection request
+        const response = await fetch(`${API_CONFIG.BASE_URL}/api/connections/send-request`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            recipientId: memberId,
+            message: `Hi ${memberName}, I'd like to connect with you on our faith journey!`
+          }),
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          setConnectionStatuses(prev => ({
+            ...prev,
+            [memberId]: 'sent'
+          }));
+          alert(`Connection request sent to ${memberName}!`);
+        } else {
+          alert(data.message || 'Failed to send connection request');
+        }
       }
     } catch (error) {
       console.error('Connection error:', error);
-      alert('Failed to send connection request. Please try again.');
+      alert('Failed to process connection request. Please try again.');
     } finally {
       setActionLoading(prev => ({ ...prev, [memberId]: null }));
     }
@@ -502,11 +563,11 @@ const AllMembers = () => {
                         <>
                           <button 
                             className={`${styles.connectButton} ${connectionStatus === 'connected' ? styles.connected : ''}`}
-                            onClick={() => handleConnect(member._id, member.firstName)}
+                            onClick={() => handleConnectionAction(member._id, member.firstName)}
                             disabled={isActionLoading === 'connect' || connectionStatus === 'connected'}
                           >
                             <span className="material-icons">{getConnectionButtonIcon(connectionStatus)}</span>
-                            {isActionLoading === 'connect' ? 'Connecting...' : getConnectionButtonText(connectionStatus)}
+                            {isActionLoading === 'connect' ? 'Processing...' : getConnectionButtonText(connectionStatus)}
                           </button>
                           
                           <button 
