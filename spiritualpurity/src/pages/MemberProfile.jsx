@@ -112,7 +112,7 @@ const MemberProfile = () => {
       setLoadingConnections(true);
       const token = localStorage.getItem('token');
       
-      const response = await fetch(`${API_CONFIG.BASE_URL}/api/connections/my-connections`, {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/connections`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -122,13 +122,17 @@ const MemberProfile = () => {
       const data = await response.json();
 
       if (data.success) {
-        setConnections(data.data.connections || []);
+        setConnections(data.data.connections.map(conn => ({
+          ...conn.user,
+          connectionId: conn._id,
+          connectedAt: conn.connectedAt
+        })));
       }
-    } catch (error) {
-      console.error('Error fetching connections:', error);
-    } finally {
-      setLoadingConnections(false);
-    }
+      } catch (error) {
+        console.error('Error fetching connections:', error);
+      } finally {
+        setLoadingConnections(false);
+      }
   };
 
   const handleInputChange = (e) => {
@@ -761,7 +765,7 @@ const MemberProfile = () => {
                                   </button>
                                   <button 
                                     className={styles.removeConnectionButton}
-                                    onClick={() => handleRemoveConnection(connection.connectionId)}
+                                    onClick={() => handleRemoveConnection(connection._id)}
                                   >
                                     <span className="material-icons">person_remove</span>
                                     Remove
