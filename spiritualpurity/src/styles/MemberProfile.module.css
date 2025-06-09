@@ -778,6 +778,16 @@
 
 /* Responsive Design - Including Header Width Fix */
 @media (max-width: 768px) {
+  
+  .relationshipStatus,
+.location {
+  justify-content: center;
+}
+
+.headerActions {
+  justify-content: center;
+}
+  
   .profileTabs {
     flex-wrap: wrap;
     gap: 0.5rem;
