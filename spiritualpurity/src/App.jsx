@@ -5,23 +5,23 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import './App.css';
-import Header from './frontend/components/Header';
-import Footer from './frontend/components/Footer';
-import HowItWorks from './frontend/components/HowItWorks';
-import CurrentMembers from './frontend/components/MeetSomeWallflowers';
-import SignupModal from './frontend/components/SignupModal';
-import LoginModal from './frontend/components/LoginModal';
-import Profile from './frontend/components/profile/profile'; // Fixed: uppercase 'P'
-import ProfileView from './frontend/components/profile/ProfileView';
-import GardeningInterface from './frontend/components/browse/GardeningInterface';
-import Garden from './frontend/components/garden/Garden';
-import MockProfilesManager from './frontend/components/admin/MockProfilesManager';
+import Header from './components/Header';
+import Footer from './components/Footer';
+import HowItWorks from './components/HowItWorks';
+import CurrentMembers from './components/MeetSomeWallflowers';
+import SignupModal from './components/SignupModal';
+import LoginModal from './components/LoginModal';
+import Profile from './components/profile/profile'; // Fixed: uppercase 'P'
+import ProfileView from './components/profile/ProfileView';
+import GardeningInterface from './components/browse/GardeningInterface';
+import Garden from './components/garden/Garden';
+import MockProfilesManager from './components/admin/MockProfilesManager';
 
 // Import new pages
-import TermsOfService from './frontend/pages/TermsOfService';
-import PrivacyPolicy from './frontend/pages/PrivacyPolicy';
-import CommunityGuidelines from './frontend/pages/CommunityGuidelines';
-import SafetyTips from './frontend/pages/SafetyTips';
+import TermsOfService from './pages/TermsOfService';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import CommunityGuidelines from './pages/CommunityGuidelines';
+import SafetyTips from './pages/SafetyTips';
 import PrayerGroups from './pages/PrayerGroups';
 
 // Protected Route component
