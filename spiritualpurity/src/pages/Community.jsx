@@ -13,7 +13,8 @@ const Community = () => {
     totalMembers: 0,
     activeDiscussions: 0,
     prayerRequests: 0,
-    upcomingEvents: 0
+    upcomingEvents: 0,
+    prayerGroups: 0
   });
   const [recentActivity, setRecentActivity] = useState([]);
   const [featuredMembers, setFeaturedMembers] = useState([]);
@@ -37,6 +38,22 @@ const Community = () => {
             totalMembers: membersData.data.count || membersData.data.members.length
           }));
         }
+      }
+
+      // Fetch prayer groups count
+      try {
+        const groupsResponse = await fetch(`${API_CONFIG.BASE_URL}/api/prayers/groups`);
+        if (groupsResponse.ok) {
+          const groupsData = await groupsResponse.json();
+          if (groupsData.success) {
+            setStats(prev => ({
+              ...prev,
+              prayerGroups: groupsData.data.groups.length
+            }));
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching prayer groups:', error);
       }
 
       // Mock data for other stats (you can implement these later)
@@ -148,13 +165,13 @@ const Community = () => {
               </Link>
             </div>
             <div className="col-md-6 col-lg-3 mb-4">
-              <Link to="/groups" className={styles.featureCard}>
+              <Link to="/prayer-groups" className={styles.featureCard}>
                 <div className={styles.featureIcon}>
                   <i className="fas fa-heart"></i>
                 </div>
                 <h3>Prayer Groups</h3>
                 <p>Join small groups for prayer and support</p>
-                <span className={styles.prayerBadge}>15 groups</span>
+                <span className={styles.prayerBadge}>{stats.prayerGroups || 15} groups</span>
               </Link>
             </div>
             <div className="col-md-6 col-lg-3 mb-4">

@@ -4,6 +4,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
 const User = require('../models/User');
+const PrayerGroup = require('../models/PrayerGroup');
 
 // @route   GET /api/prayers/community-requests
 // @desc    Get all community prayer requests (public prayers from all users)
@@ -372,6 +373,246 @@ router.get('/user/:userId', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch prayer requests'
+    });
+  }
+});
+
+// ========== PRAYER GROUPS ROUTES ==========
+
+// @route   GET /api/prayers/groups
+// @desc    Get all prayer groups
+// @access  Public
+router.get('/groups', async (req, res) => {
+  try {
+    const groups = await PrayerGroup.find()
+      .populate('leader', 'firstName lastName profilePicture')
+      .populate('members.user', 'firstName lastName profilePicture')
+      .sort('-createdAt');
+
+    res.json({
+      success: true,
+      data: {
+        groups
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching prayer groups:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching prayer groups'
+    });
+  }
+});
+
+// @route   GET /api/prayers/groups/:groupId
+// @desc    Get single prayer group details
+// @access  Private
+router.get('/groups/:groupId', authenticateToken, async (req, res) => {
+  try {
+    const group = await PrayerGroup.findById(req.params.groupId)
+      .populate('leader', 'firstName lastName profilePicture bio')
+      .populate('members.user', 'firstName lastName profilePicture')
+      .populate('prayerRequests.user', 'firstName lastName');
+
+    if (!group) {
+      return res.status(404).json({
+        success: false,
+        message: 'Prayer group not found'
+      });
+    }
+
+    // Check if user is a member
+    const isMember = group.members.some(
+      member => member.user._id.toString() === req.user._id
+    );
+
+    // If private group and not a member, limit information
+    if (group.privacy === 'private' && !isMember) {
+      return res.json({
+        success: true,
+        data: {
+          group: {
+            _id: group._id,
+            name: group.name,
+            description: group.description,
+            category: group.category,
+            privacy: group.privacy,
+            memberCount: group.members.length,
+            leader: group.leader
+          }
+        }
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        group,
+        isMember
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching prayer group:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching prayer group details'
+    });
+  }
+});
+
+// @route   POST /api/prayers/groups/create
+// @desc    Create new prayer group
+// @access  Private
+router.post('/groups/create', authenticateToken, async (req, res) => {
+  try {
+    const { name, description, category, meetingSchedule, privacy, maxMembers } = req.body;
+
+    // Validate required fields
+    if (!name || !description || !category) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide name, description, and category'
+      });
+    }
+
+    // Create prayer group
+    const prayerGroup = new PrayerGroup({
+      name,
+      description,
+      category,
+      meetingSchedule,
+      privacy: privacy || 'public',
+      maxMembers: maxMembers || 12,
+      leader: req.user._id,
+      members: [{
+        user: req.user._id,
+        role: 'leader',
+        joinedAt: new Date()
+      }]
+    });
+
+    await prayerGroup.save();
+
+    // Populate leader info for response
+    await prayerGroup.populate('leader', 'firstName lastName profilePicture');
+    await prayerGroup.populate('members.user', 'firstName lastName profilePicture');
+
+    res.status(201).json({
+      success: true,
+      message: 'Prayer group created successfully',
+      data: {
+        group: prayerGroup
+      }
+    });
+
+  } catch (error) {
+    console.error('Create prayer group error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create prayer group'
+    });
+  }
+});
+
+// @route   POST /api/prayers/groups/:groupId/join
+// @desc    Join a prayer group
+// @access  Private
+router.post('/groups/:groupId/join', authenticateToken, async (req, res) => {
+  try {
+    const group = await PrayerGroup.findById(req.params.groupId);
+
+    if (!group) {
+      return res.status(404).json({
+        success: false,
+        message: 'Prayer group not found'
+      });
+    }
+
+    // Check if already a member
+    const isMember = group.members.some(
+      member => member.user.toString() === req.user._id
+    );
+
+    if (isMember) {
+      return res.status(400).json({
+        success: false,
+        message: 'You are already a member of this group'
+      });
+    }
+
+    // Check if group is full
+    if (group.members.length >= group.maxMembers) {
+      return res.status(400).json({
+        success: false,
+        message: 'This prayer group is full'
+      });
+    }
+
+    // Add member
+    group.members.push({
+      user: req.user._id,
+      role: 'member',
+      joinedAt: new Date()
+    });
+
+    await group.save();
+
+    res.json({
+      success: true,
+      message: 'Successfully joined the prayer group',
+      data: {
+        groupId: group._id
+      }
+    });
+
+  } catch (error) {
+    console.error('Join prayer group error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to join prayer group'
+    });
+  }
+});
+
+// @route   POST /api/prayers/groups/:groupId/leave
+// @desc    Leave a prayer group
+// @access  Private
+router.post('/groups/:groupId/leave', authenticateToken, async (req, res) => {
+  try {
+    const group = await PrayerGroup.findById(req.params.groupId);
+
+    if (!group) {
+      return res.status(404).json({
+        success: false,
+        message: 'Prayer group not found'
+      });
+    }
+
+    // Check if user is the leader
+    if (group.leader.toString() === req.user._id) {
+      return res.status(400).json({
+        success: false,
+        message: 'Group leaders cannot leave their own group. Please transfer leadership first.'
+      });
+    }
+
+    // Remove member
+    group.members = group.members.filter(
+      member => member.user.toString() !== req.user._id
+    );
+
+    await group.save();
+
+    res.json({
+      success: true,
+      message: 'Successfully left the prayer group'
+    });
+
+  } catch (error) {
+    console.error('Leave prayer group error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to leave prayer group'
     });
   }
 });
