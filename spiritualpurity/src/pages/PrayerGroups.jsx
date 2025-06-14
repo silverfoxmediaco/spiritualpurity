@@ -430,6 +430,37 @@ const PrayerGroups = () => {
                       </button>
                     )}
                   </div>
+                  
+                  {/* Prayer Requests Section - Show only for groups user is a member of */}
+                  {isUserInGroup(group) && (
+                    <div className={styles.groupPrayers}>
+                      <h4 className={styles.prayersTitle}>Recent Prayer Requests</h4>
+                      {group.prayerRequests && group.prayerRequests.length > 0 ? (
+                        <div className={styles.prayersList}>
+                          {group.prayerRequests.slice(0, 3).map((prayer, index) => (
+                            <div key={prayer._id || index} className={styles.prayerItem}>
+                              <p className={styles.prayerText}>{prayer.request}</p>
+                              <div className={styles.prayerMeta}>
+                                <span className={styles.prayerAuthor}>
+                                  {prayer.user.firstName} {prayer.user.lastName}
+                                </span>
+                                <span className={styles.prayerDate}>
+                                  {new Date(prayer.createdAt).toLocaleDateString()}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                          {group.prayerRequests.length > 3 && (
+                            <p className={styles.morePrayers}>
+                              +{group.prayerRequests.length - 3} more prayers
+                            </p>
+                          )}
+                        </div>
+                      ) : (
+                        <p className={styles.noPrayers}>No prayer requests yet</p>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))
             )}

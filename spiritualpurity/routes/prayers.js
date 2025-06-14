@@ -387,6 +387,7 @@ router.get('/groups', async (req, res) => {
     const groups = await PrayerGroup.find()
       .populate('leader', 'firstName lastName profilePicture')
       .populate('members.user', 'firstName lastName profilePicture')
+      .populate('prayerRequests.user', 'firstName lastName')
       .sort('-createdAt');
 
     res.json({
