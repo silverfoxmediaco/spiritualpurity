@@ -8,6 +8,7 @@ import PublicMemberProfile from './pages/PublicMemberProfile';
 import AllMembers from './pages/AllMembers';
 import Community from './pages/Community';
 import Prayer from './pages/Prayer';
+import PrayerGroups from './pages/PrayerGroups';
 import Resources from './pages/Resources';
 import PostView from './pages/PostView';
 import AdvertiserDashboard from './pages/AdvertiserDashboard';
@@ -36,6 +37,7 @@ function App() {
           <Route path="/members" element={<AllMembers />} />
           <Route path="/community" element={<Community />} />
           <Route path="/prayer" element={<Prayer />} />
+          <Route path="/prayer-groups" element={<PrayerGroups />} />
           <Route path="/resources" element={<Resources />} />
           <Route path="/member/:id" element={<PublicMemberProfile />} />
           <Route path="/post/:id" element={<PostView />} />
