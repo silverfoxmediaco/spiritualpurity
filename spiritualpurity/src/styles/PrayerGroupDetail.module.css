@@ -650,6 +650,85 @@
   .actionButton span {
     font-size: 20px;
   }
+
+  /* Prayer Requests Section - ADD THIS TO YOUR EXISTING CSS FILE */
+.groupPrayers {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f0f0f0;
+}
+
+.prayersTitle {
+  color: #333;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.prayersTitle::before {
+  content: '🙏';
+  font-size: 1rem;
+}
+
+.prayersList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.prayerItem {
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 3px solid #ff6b35;
+}
+
+.prayerText {
+  color: #333;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.prayerMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+}
+
+.prayerAuthor {
+  color: #ff6b35;
+  font-weight: 500;
+}
+
+.prayerDate {
+  color: #999;
+}
+
+.morePrayers {
+  text-align: center;
+  color: #666;
+  font-size: 0.85rem;
+  font-style: italic;
+  margin-top: 0.5rem;
+}
+
+.noPrayers {
+  text-align: center;
+  color: #999;
+  font-size: 0.85rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
   
   /* Responsive Design */
   @media (max-width: 992px) {
