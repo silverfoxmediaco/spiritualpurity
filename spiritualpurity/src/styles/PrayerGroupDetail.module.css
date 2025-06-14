@@ -1,0 +1,703 @@
+/* src/styles/PrayerGroupDetail.module.css */
+
+.groupDetailPage {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #f5f5f5;
+  }
+  
+  /* Loading State */
+  .loadingContainer {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 4rem 2rem;
+  }
+  
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f0f0f0;
+    border-top: 5px solid #ff6b35;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 2rem;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .loadingContainer h2 {
+    color: #333;
+    margin-bottom: 0.5rem;
+  }
+  
+  /* Error State */
+  .errorContainer {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 4rem 2rem;
+    text-align: center;
+  }
+  
+  .errorContainer h2 {
+    color: #333;
+    margin-bottom: 1rem;
+  }
+  
+  .errorContainer p {
+    color: #666;
+    margin-bottom: 2rem;
+  }
+  
+  .backButton {
+    padding: 0.75rem 2rem;
+    background: #ff6b35;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .backButton:hover {
+    background: #ff4517;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+  }
+  
+  /* Group Header */
+  .groupHeader {
+    background: linear-gradient(135deg, #ff6b35 0%, #ff4517 100%);
+    color: white;
+    padding: 4rem 0 3rem;
+  }
+  
+  .headerContent {
+    display: flex;
+    align-items: flex-start;
+    gap: 2rem;
+  }
+  
+  .groupIcon {
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  
+  .groupIcon span {
+    font-size: 40px;
+  }
+  
+  .groupInfo {
+    flex: 1;
+  }
+  
+  .groupInfo h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .groupDescription {
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.95;
+    line-height: 1.6;
+  }
+  
+  .groupMeta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+  
+  .metaItem {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    opacity: 0.9;
+  }
+  
+  .metaItem span.material-icons {
+    font-size: 20px;
+  }
+  
+  .privateBadge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+  
+  .privateBadge span {
+    font-size: 16px;
+  }
+  
+  .groupActions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .joinButton,
+  .leaveButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+  }
+  
+  .joinButton {
+    background: white;
+    color: #ff6b35;
+  }
+  
+  .joinButton:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+  
+  .joinButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  .leaveButton {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid white;
+  }
+  
+  .leaveButton:hover {
+    background: white;
+    color: #ff6b35;
+    transform: translateY(-2px);
+  }
+  
+  /* Tabs */
+  .tabSection {
+    background: white;
+    border-bottom: 1px solid #e0e0e0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  
+  .tabs {
+    display: flex;
+    gap: 2rem;
+  }
+  
+  .tab {
+    padding: 1rem 0;
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+  }
+  
+  .tab:hover {
+    color: #ff6b35;
+  }
+  
+  .tab.active {
+    color: #ff6b35;
+  }
+  
+  .tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #ff6b35;
+  }
+  
+  /* Content Section */
+  .content {
+    padding: 3rem 0;
+  }
+  
+  /* About Content */
+  .aboutContent {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  
+  .section {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .section:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+  
+  .section h2 {
+    color: #333;
+    margin-bottom: 1rem;
+  }
+  
+  .section h3 {
+    color: #666;
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .section p {
+    color: #666;
+    line-height: 1.6;
+  }
+  
+  .section ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .section ul li {
+    padding: 0.5rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+    color: #666;
+  }
+  
+  .section ul li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: #ff6b35;
+    font-weight: bold;
+  }
+  
+  /* Members Content */
+  .membersContent {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  
+  .membersContent h2 {
+    color: #333;
+    margin-bottom: 1.5rem;
+  }
+  
+  .membersList {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .memberCard {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8f8f8;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+  
+  .memberCard:hover {
+    background: #f0f0f0;
+  }
+  
+  .memberAvatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  
+  .memberAvatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .memberAvatar span {
+    color: #999;
+    font-size: 24px;
+  }
+  
+  .memberInfo {
+    flex: 1;
+  }
+  
+  .memberInfo h4 {
+    color: #333;
+    margin-bottom: 0.25rem;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .leaderBadge {
+    padding: 0.2rem 0.5rem;
+    background: #ff6b35;
+    color: white;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: normal;
+  }
+  
+  .memberInfo p {
+    color: #999;
+    font-size: 0.85rem;
+    margin: 0;
+  }
+  
+  .viewProfileButton {
+    padding: 0.5rem 1rem;
+    background: none;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    color: #666;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .viewProfileButton:hover {
+    border-color: #ff6b35;
+    color: #ff6b35;
+    background: rgba(255, 107, 53, 0.05);
+  }
+  
+  /* Prayers Content */
+  .prayersContent {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  
+  .prayersContent h2 {
+    color: #333;
+    margin-bottom: 1.5rem;
+  }
+  
+  .prayerForm {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .prayerForm textarea {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    resize: vertical;
+    min-height: 100px;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+  }
+  
+  .prayerForm textarea:focus {
+    outline: none;
+    border-color: #ff6b35;
+    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+  }
+  
+  .submitButton {
+    padding: 0.75rem 2rem;
+    background: #ff6b35;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .submitButton:hover:not(:disabled) {
+    background: #ff4517;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+  }
+  
+  .submitButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  .prayersList {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .prayerCard {
+    padding: 1.5rem;
+    background: #f8f8f8;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+  
+  .prayerCard:hover {
+    background: #f0f0f0;
+  }
+  
+  .prayerHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .prayerHeader strong {
+    color: #333;
+  }
+  
+  .prayerHeader span {
+    color: #999;
+    font-size: 0.85rem;
+  }
+  
+  .prayerText {
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+  
+  .prayerActions {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  .prayButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    color: #666;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .prayButton:hover {
+    border-color: #ff6b35;
+    color: #ff6b35;
+    background: rgba(255, 107, 53, 0.05);
+  }
+  
+  .prayButton span {
+    font-size: 18px;
+  }
+  
+  .noPrayers {
+    text-align: center;
+    color: #999;
+    padding: 3rem;
+  }
+  
+  /* Sidebar */
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .sidebarCard {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  
+  .sidebarCard h3 {
+    color: #333;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .leaderInfo {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .leaderAvatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  
+  .leaderAvatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .leaderAvatar span {
+    color: #999;
+    font-size: 30px;
+  }
+  
+  .leaderInfo h4 {
+    color: #333;
+    margin-bottom: 0.25rem;
+  }
+  
+  .leaderInfo p {
+    color: #666;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+  
+  .viewLeaderButton {
+    width: 100%;
+    padding: 0.75rem;
+    background: #f8f8f8;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    color: #666;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .viewLeaderButton:hover {
+    background: #ff6b35;
+    border-color: #ff6b35;
+    color: white;
+  }
+  
+  .quickActions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .actionButton {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: #f8f8f8;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    color: #666;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .actionButton:hover {
+    background: #ff6b35;
+    border-color: #ff6b35;
+    color: white;
+  }
+  
+  .actionButton span {
+    font-size: 20px;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 992px) {
+    .headerContent {
+      flex-direction: column;
+    }
+    
+    .groupActions {
+      width: 100%;
+    }
+    
+    .joinButton,
+    .leaveButton {
+      width: 100%;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .groupInfo h1 {
+      font-size: 2rem;
+    }
+    
+    .groupDescription {
+      font-size: 1rem;
+    }
+    
+    .groupMeta {
+      gap: 1rem;
+    }
+    
+    .tabs {
+      gap: 1rem;
+    }
+    
+    .tab {
+      font-size: 0.9rem;
+    }
+    
+    .memberCard {
+      flex-direction: column;
+      text-align: center;
+    }
+    
+    .memberInfo h4 {
+      justify-content: center;
+    }
+    
+    .viewProfileButton {
+      width: 100%;
+    }
+  }
