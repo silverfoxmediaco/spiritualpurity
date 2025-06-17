@@ -34,11 +34,25 @@ const PublicMemberProfile = () => {
         return true;
       } catch (e) {
         console.error('Error parsing user data:', e);
+        // Clear invalid data
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
         return false;
       }
     }
     return false;
   }, []);
+
+  const handleAuthError = useCallback(() => {
+    // Clear auth data and redirect to login
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/');
+    // Use the onClose method if your login is a modal, or navigate to login page
+    setTimeout(() => {
+      alert('Your session has expired. Please log in again.');
+    }, 100);
+  }, [navigate]);
 
   const fetchMemberProfile = useCallback(async () => {
     try {
@@ -47,13 +61,12 @@ const PublicMemberProfile = () => {
       if (!token) {
         setError('Please log in to view member profiles');
         setLoading(false);
-        navigate('/login');
+        handleAuthError();
         return;
       }
 
       // Log for debugging
       console.log('Fetching profile for ID:', id);
-      console.log('Token exists:', !!token);
 
       const response = await fetch(`${API_CONFIG.BASE_URL}/api/users/public-profile/${id}`, {
         method: 'GET',
@@ -75,11 +88,11 @@ const PublicMemberProfile = () => {
       } else {
         setError(data.message || 'Member not found');
         
-        // If token is invalid, redirect to login
-        if (data.message === 'Invalid token' || data.message === 'Token expired') {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          navigate('/login');
+        // Handle various auth errors
+        if (data.message === 'Invalid token' || 
+            data.message === 'Token expired' || 
+            data.message === 'Access token required') {
+          handleAuthError();
         }
       }
     } catch (error) {
@@ -88,7 +101,7 @@ const PublicMemberProfile = () => {
     } finally {
       setLoading(false);
     }
-  }, [id, navigate]);
+  }, [id, handleAuthError]);
 
   const fetchConnectionStatus = async () => {
     try {
@@ -143,6 +156,12 @@ const PublicMemberProfile = () => {
       });
 
       const data = await response.json();
+      
+      if (response.status === 401) {
+        handleAuthError();
+        return;
+      }
+      
       if (data.success) {
         setConnectionStatus('sent');
         alert(`Connection request sent to ${member.firstName}!`);
@@ -179,6 +198,12 @@ const PublicMemberProfile = () => {
       });
 
       const data = await response.json();
+      
+      if (response.status === 401) {
+        handleAuthError();
+        return;
+      }
+      
       if (data.success) {
         // Redirect to profile with a message to check their messages
         navigate('/profile');
@@ -216,6 +241,12 @@ const PublicMemberProfile = () => {
       );
 
       const data = await response.json();
+      
+      if (response.status === 401) {
+        handleAuthError();
+        return;
+      }
+      
       if (data.success) {
         alert('🙏 Your prayer has been recorded. Thank you for praying!');
         // Refresh the member profile to show updated count
@@ -291,9 +322,9 @@ const PublicMemberProfile = () => {
     if (hasUser && id) {
       fetchMemberProfile();
     } else if (!hasUser) {
-      navigate('/login');
+      handleAuthError();
     }
-  }, [id, checkCurrentUser, fetchMemberProfile, navigate]);
+  }, [id, checkCurrentUser, fetchMemberProfile, handleAuthError]);
 
   if (loading) {
     return (
