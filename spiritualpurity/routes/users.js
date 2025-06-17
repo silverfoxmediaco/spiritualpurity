@@ -1,4 +1,4 @@
-// routes/users.js
+// spiritualpurity-backend/routes/users.js
 
 const express = require('express');
 const User = require('../models/User');
@@ -6,6 +6,8 @@ const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const cloudinary = require('cloudinary').v2;
+const mongoose = require('mongoose');
+const { authenticateToken } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -51,40 +53,6 @@ const upload = multer({
   }
 });
 
-// Middleware to verify JWT token
-const authenticateToken = async (req, res, next) => {
-  try {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
-
-    if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: 'Access token required'
-      });
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.userId);
-
-    if (!user || !user.isActive) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid or expired token'
-      });
-    }
-
-    req.user = user;
-    next();
-  } catch (error) {
-    console.error('Token verification error:', error);
-    return res.status(401).json({
-      success: false,
-      message: 'Invalid token'
-    });
-  }
-};
-
 // Helper function to calculate compatibility score between two users
 function calculateCompatibilityScore(currentUser, otherUser) {
   let score = 0;
@@ -107,214 +75,103 @@ function calculateCompatibilityScore(currentUser, otherUser) {
     }
   }
   
-  // Same relationship status (2 points)
-  if (currentUser.relationshipStatus && otherUser.relationshipStatus && 
-      currentUser.relationshipStatus === otherUser.relationshipStatus) {
-    score += 2;
+  // Compatible relationship goals (5 points)
+  if (currentUser.relationshipStatus && otherUser.relationshipStatus) {
+    const compatibleStatuses = {
+      'Single': ['Single'],
+      'Dating': ['Single', 'Dating'],
+      'Engaged': ['Engaged'],
+      'Married': ['Married'],
+      'Widowed': ['Widowed', 'Single'],
+      'Divorced': ['Divorced', 'Single']
+    };
+    
+    if (compatibleStatuses[currentUser.relationshipStatus]?.includes(otherUser.relationshipStatus)) {
+      score += 5;
+    }
   }
   
-  // Recent joiner bonus (1 point if joined within last 30 days)
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-  if (otherUser.joinDate > thirtyDaysAgo) {
-    score += 1;
+  // Age proximity (max 5 points, decreases with age difference)
+  if (currentUser.dateOfBirth && otherUser.dateOfBirth) {
+    const ageDiff = Math.abs(
+      new Date(currentUser.dateOfBirth).getFullYear() - 
+      new Date(otherUser.dateOfBirth).getFullYear()
+    );
+    if (ageDiff <= 2) score += 5;
+    else if (ageDiff <= 5) score += 3;
+    else if (ageDiff <= 10) score += 1;
   }
   
   return score;
 }
 
-// @route   GET /api/users/newest-members
-// @desc    Get newest members for homepage display
-// @access  Public
-router.get('/newest-members', async (req, res) => {
+// @route   GET /api/users/all
+// @desc    Get all members with optional filters
+// @access  Public (but limited data for non-authenticated users)
+router.get('/all', async (req, res) => {
   try {
-    console.log('GET /api/users/newest-members called'); // Debug log
-    
-    // Get the 6 most recent active members
-    const members = await User.find({ 
-      isActive: true 
-    })
-    .select('firstName lastName profilePicture bio location relationshipStatus privacy joinDate prayerStats')
-    .sort({ joinDate: -1 })
-    .limit(6);
+    const { 
+      location,
+      relationshipStatus,
+      interests,
+      sortBy = 'newest',
+      page = 1,
+      limit = 20
+    } = req.query;
 
-    console.log(`Found ${members.length} members`); // Debug log
+    // Build query
+    let query = { isActive: true };
 
-    // Filter out users who have privacy settings that would hide them
-    const publicMembers = members.map(member => {
-      const memberObj = member.toObject();
-      
-      // Apply privacy settings
-      if (!memberObj.privacy?.showLocation) {
-        delete memberObj.location;
+    // Location filter
+    if (location) {
+      const [city, state] = location.split(',').map(s => s.trim());
+      if (state) {
+        query['location.state'] = state;
+        if (city) {
+          query['location.city'] = city;
+        }
       }
-      
-      if (!memberObj.privacy?.showRelationshipStatus) {
-        delete memberObj.relationshipStatus;
-      }
-      
-      // Always show basic info (name, profile picture, join date) for newest members section
-      return {
-        _id: memberObj._id,
-        firstName: memberObj.firstName,
-        lastName: memberObj.lastName,
-        profilePicture: memberObj.profilePicture,
-        bio: memberObj.bio,
-        location: memberObj.location,
-        relationshipStatus: memberObj.relationshipStatus,
-        privacy: memberObj.privacy,
-        joinDate: memberObj.joinDate,
-        prayerStats: memberObj.prayerStats
-      };
-    });
-
-    console.log('Sending response with members:', publicMembers.length); // Debug log
-
-    res.json({
-      success: true,
-      message: 'Newest members retrieved successfully',
-      data: {
-        members: publicMembers,
-        count: publicMembers.length
-      }
-    });
-
-  } catch (error) {
-    console.error('Get newest members error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error while retrieving newest members',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
-  }
-});
-
-// @route   GET /api/users/personalized-featured
-// @desc    Get personalized featured members based on user interests and location
-// @access  Private (requires authentication)
-router.get('/personalized-featured', authenticateToken, async (req, res) => {
-  try {
-    const currentUser = await User.findById(req.user._id)
-      .select('interests location relationshipStatus joinDate');
-    
-    if (!currentUser) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
     }
 
-    // Find all active users except current user
-    const allUsers = await User.find({
-      _id: { $ne: currentUser._id },
-      isActive: true
-    })
-    .select('firstName lastName profilePicture bio location interests relationshipStatus privacy joinDate prayerStats')
-    .lean(); // Use lean() for better performance
-
-    // Calculate compatibility scores for each user
-    const usersWithScores = allUsers.map(user => {
-      const score = calculateCompatibilityScore(currentUser, user);
-      return {
-        ...user,
-        compatibilityScore: score
-      };
-    });
-
-    // Sort by compatibility score (highest first) and take top matches
-    const recommendedUsers = usersWithScores
-      .filter(user => user.compatibilityScore > 0) // Only show users with some compatibility
-      .sort((a, b) => b.compatibilityScore - a.compatibilityScore)
-      .slice(0, 6);
-
-    // If not enough personalized matches, supplement with newest members
-    if (recommendedUsers.length < 4) {
-      const newestMembers = await User.find({
-        _id: { 
-          $ne: currentUser._id,
-          $nin: recommendedUsers.map(u => u._id)
-        },
-        isActive: true
-      })
-      .select('firstName lastName profilePicture bio location relationshipStatus privacy joinDate prayerStats')
-      .sort({ joinDate: -1 })
-      .limit(6 - recommendedUsers.length)
-      .lean();
-
-      // Add newest members with score of 0 to distinguish them
-      const newestWithScores = newestMembers.map(user => ({
-        ...user,
-        compatibilityScore: 0
-      }));
-
-      recommendedUsers.push(...newestWithScores);
+    // Relationship status filter
+    if (relationshipStatus) {
+      query.relationshipStatus = relationshipStatus;
     }
 
-    // Apply privacy settings and clean up the response
-    const publicMembers = recommendedUsers.map(member => {
-      const memberObj = { ...member };
-      
-      // Apply privacy settings
-      if (!memberObj.privacy?.showLocation) {
-        delete memberObj.location;
-      }
-      
-      if (!memberObj.privacy?.showRelationshipStatus) {
-        delete memberObj.relationshipStatus;
-      }
+    // Interests filter (match any of the provided interests)
+    if (interests) {
+      const interestArray = interests.split(',').map(s => s.trim());
+      query.interests = { $in: interestArray };
+    }
 
-      if (!memberObj.privacy?.showInterests) {
-        delete memberObj.interests;
-      }
-      
-      // Remove privacy object from response
-      delete memberObj.privacy;
-      
-      return {
-        _id: memberObj._id,
-        firstName: memberObj.firstName,
-        lastName: memberObj.lastName,
-        profilePicture: memberObj.profilePicture,
-        bio: memberObj.bio,
-        location: memberObj.location,
-        relationshipStatus: memberObj.relationshipStatus,
-        interests: memberObj.interests,
-        joinDate: memberObj.joinDate,
-        prayerStats: memberObj.prayerStats,
-        compatibilityScore: memberObj.compatibilityScore,
-        isPersonalized: memberObj.compatibilityScore > 0
-      };
-    });
+    // Get total count for pagination
+    const total = await User.countDocuments(query);
 
-    res.json({
-      success: true,
-      message: 'Personalized featured members retrieved successfully',
-      data: {
-        members: publicMembers,
-        count: publicMembers.length,
-        personalizedCount: publicMembers.filter(m => m.isPersonalized).length
-      }
-    });
+    // Build sort options
+    let sortOptions = {};
+    switch (sortBy) {
+      case 'newest':
+        sortOptions = { joinDate: -1 };
+        break;
+      case 'oldest':
+        sortOptions = { joinDate: 1 };
+        break;
+      case 'mostActive':
+        sortOptions = { lastLogin: -1 };
+        break;
+      case 'alphabetical':
+        sortOptions = { firstName: 1, lastName: 1 };
+        break;
+      default:
+        sortOptions = { joinDate: -1 };
+    }
 
-  } catch (error) {
-    console.error('Get personalized featured members error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error while retrieving personalized members'
-    });
-  }
-});
-
-// @route   GET /api/users/all-members
-// @desc    Get all members for the members directory page
-// @access  Public
-router.get('/all-members', async (req, res) => {
-  try {
-    // Get all active members
-    const members = await User.find({ 
-      isActive: true 
-    })
-    .select('firstName lastName profilePicture bio location relationshipStatus privacy joinDate prayerStats')
-    .sort({ joinDate: -1 });
+    // Fetch members with pagination
+    const members = await User.find(query)
+      .select('firstName lastName profilePicture bio location relationshipStatus interests privacy joinDate prayerStats')
+      .sort(sortOptions)
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
 
     // Apply privacy settings
     const publicMembers = members.map(member => {
@@ -349,7 +206,10 @@ router.get('/all-members', async (req, res) => {
       message: 'All members retrieved successfully',
       data: {
         members: publicMembers,
-        count: publicMembers.length
+        count: publicMembers.length,
+        total,
+        pages: Math.ceil(total / limit),
+        currentPage: parseInt(page)
       }
     });
 
@@ -405,8 +265,8 @@ router.put('/profile', authenticateToken, async (req, res) => {
       location,
       relationshipStatus,
       testimony,
-      favoriteVerse,
-      privacy
+      dateOfBirth,
+      phone
     } = req.body;
 
     const user = await User.findById(req.user._id);
@@ -419,37 +279,33 @@ router.put('/profile', authenticateToken, async (req, res) => {
     }
 
     // Update fields if provided
-    if (firstName !== undefined) user.firstName = firstName.trim();
-    if (lastName !== undefined) user.lastName = lastName.trim();
-    if (bio !== undefined) user.bio = bio.trim();
-    if (location !== undefined) user.location = { ...user.location, ...location };
+    if (firstName !== undefined) user.firstName = firstName;
+    if (lastName !== undefined) user.lastName = lastName;
+    if (bio !== undefined) user.bio = bio;
+    if (location !== undefined) user.location = location;
     if (relationshipStatus !== undefined) user.relationshipStatus = relationshipStatus;
-    if (testimony !== undefined) user.testimony = testimony.trim();
-    if (favoriteVerse !== undefined) user.favoriteVerse = { ...user.favoriteVerse, ...favoriteVerse };
-    if (privacy !== undefined) user.privacy = { ...user.privacy, ...privacy };
+    if (testimony !== undefined) user.testimony = testimony;
+    if (dateOfBirth !== undefined) user.dateOfBirth = dateOfBirth;
+    if (phone !== undefined) user.phone = phone;
 
     await user.save();
+
+    // Remove sensitive fields before sending response
+    const userObj = user.toObject();
+    delete userObj.password;
+    delete userObj.emailVerificationToken;
+    delete userObj.emailVerificationExpires;
 
     res.json({
       success: true,
       message: 'Profile updated successfully',
       data: {
-        user: user.getPublicProfile()
+        user: userObj
       }
     });
 
   } catch (error) {
     console.error('Update profile error:', error);
-    
-    if (error.name === 'ValidationError') {
-      const errorMessages = Object.values(error.errors).map(err => err.message);
-      return res.status(400).json({
-        success: false,
-        message: 'Validation failed',
-        errors: errorMessages
-      });
-    }
-
     res.status(500).json({
       success: false,
       message: 'Server error while updating profile'
@@ -457,14 +313,65 @@ router.put('/profile', authenticateToken, async (req, res) => {
   }
 });
 
+// @route   PUT /api/users/privacy
+// @desc    Update privacy settings
+// @access  Private
+router.put('/privacy', authenticateToken, async (req, res) => {
+  try {
+    const {
+      showEmail,
+      showPhone,
+      showLocation,
+      showPrayerRequests,
+      showTestimony,
+      showRelationshipStatus,
+      showInterests
+    } = req.body;
+
+    const user = await User.findById(req.user._id);
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Update privacy settings
+    if (showEmail !== undefined) user.privacy.showEmail = showEmail;
+    if (showPhone !== undefined) user.privacy.showPhone = showPhone;
+    if (showLocation !== undefined) user.privacy.showLocation = showLocation;
+    if (showPrayerRequests !== undefined) user.privacy.showPrayerRequests = showPrayerRequests;
+    if (showTestimony !== undefined) user.privacy.showTestimony = showTestimony;
+    if (showRelationshipStatus !== undefined) user.privacy.showRelationshipStatus = showRelationshipStatus;
+    if (showInterests !== undefined) user.privacy.showInterests = showInterests;
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Privacy settings updated successfully',
+      data: {
+        privacy: user.privacy
+      }
+    });
+
+  } catch (error) {
+    console.error('Update privacy settings error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while updating privacy settings'
+    });
+  }
+});
+
 // @route   PUT /api/users/interests
-// @desc    Update user's spiritual interests
+// @desc    Update user interests
 // @access  Private
 router.put('/interests', authenticateToken, async (req, res) => {
   try {
     const { interests } = req.body;
 
-    // Validate interests array
     if (!Array.isArray(interests)) {
       return res.status(400).json({
         success: false,
@@ -472,6 +379,7 @@ router.put('/interests', authenticateToken, async (req, res) => {
       });
     }
 
+    // Validate interests against allowed list
     const validInterests = [
       'Prayer', 'Bible Study', 'Worship', 'Youth Ministry', 'Children Ministry',
       'Missions', 'Evangelism', 'Marriage', 'Parenting', 'Singles', 'Seniors',
@@ -547,28 +455,26 @@ router.post('/upload-avatar', authenticateToken, upload.single('avatar'), async 
         const publicId = `spiritualpurity/profile-pictures/${publicIdWithExtension.split('.')[0]}`;
         
         await cloudinary.uploader.destroy(publicId);
-        console.log('Old profile picture deleted from Cloudinary');
       } catch (deleteError) {
-        console.log('Could not delete old profile picture:', deleteError.message);
-        // Continue with the upload even if deletion fails
+        console.error('Error deleting old profile picture:', deleteError);
+        // Continue even if deletion fails
       }
     }
 
-    // Update user's profile picture with Cloudinary URL
-    user.profilePicture = req.file.path; // Cloudinary URL
+    // Update user's profile picture URL
+    user.profilePicture = req.file.path;
     await user.save();
 
     res.json({
       success: true,
       message: 'Profile picture uploaded successfully',
       data: {
-        profilePicture: user.profilePicture,
-        user: user.getPublicProfile()
+        profilePicture: user.profilePicture
       }
     });
 
   } catch (error) {
-    console.error('Upload avatar error:', error);
+    console.error('Upload profile picture error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while uploading profile picture'
@@ -576,17 +482,131 @@ router.post('/upload-avatar', authenticateToken, upload.single('avatar'), async 
   }
 });
 
+// @route   DELETE /api/users/avatar
+// @desc    Remove profile picture
+// @access  Private
+router.delete('/avatar', authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    if (user.profilePicture) {
+      try {
+        // Extract public_id from the URL
+        const urlParts = user.profilePicture.split('/');
+        const publicIdWithExtension = urlParts[urlParts.length - 1];
+        const publicId = `spiritualpurity/profile-pictures/${publicIdWithExtension.split('.')[0]}`;
+        
+        await cloudinary.uploader.destroy(publicId);
+      } catch (deleteError) {
+        console.error('Error deleting profile picture from Cloudinary:', deleteError);
+      }
+    }
+
+    // Remove profile picture URL
+    user.profilePicture = '';
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Profile picture removed successfully'
+    });
+
+  } catch (error) {
+    console.error('Remove profile picture error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while removing profile picture'
+    });
+  }
+});
+
+// @route   GET /api/users/recommended
+// @desc    Get recommended members based on compatibility
+// @access  Private
+router.get('/recommended', authenticateToken, async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.user._id);
+    
+    if (!currentUser) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Get all active users except current user
+    const allUsers = await User.find({
+      _id: { $ne: req.user._id },
+      isActive: true
+    }).select('firstName lastName profilePicture bio location relationshipStatus interests privacy');
+
+    // Calculate compatibility scores and sort
+    const usersWithScores = allUsers.map(user => ({
+      user: user.toObject(),
+      score: calculateCompatibilityScore(currentUser, user)
+    }));
+
+    // Sort by compatibility score (highest first)
+    usersWithScores.sort((a, b) => b.score - a.score);
+
+    // Take top 10 recommendations
+    const recommendations = usersWithScores.slice(0, 10).map(item => {
+      const userObj = item.user;
+      
+      // Apply privacy settings
+      if (!userObj.privacy?.showLocation) {
+        delete userObj.location;
+      }
+      
+      if (!userObj.privacy?.showRelationshipStatus) {
+        delete userObj.relationshipStatus;
+      }
+      
+      if (!userObj.privacy?.showInterests) {
+        delete userObj.interests;
+      }
+      
+      return {
+        ...userObj,
+        compatibilityScore: item.score
+      };
+    });
+
+    res.json({
+      success: true,
+      message: 'Recommended members retrieved successfully',
+      data: {
+        recommendations
+      }
+    });
+
+  } catch (error) {
+    console.error('Get recommended members error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while retrieving recommendations'
+    });
+  }
+});
+
 // @route   POST /api/users/prayer-request
-// @desc    Add a prayer request
+// @desc    Add a new prayer request
 // @access  Private
 router.post('/prayer-request', authenticateToken, async (req, res) => {
   try {
-    const { request, isPrivate } = req.body;
+    const { title, description, isPrivate = false } = req.body;
 
-    if (!request || request.trim().length === 0) {
+    if (!title || !description) {
       return res.status(400).json({
         success: false,
-        message: 'Prayer request text is required'
+        message: 'Title and description are required'
       });
     }
 
@@ -599,36 +619,197 @@ router.post('/prayer-request', authenticateToken, async (req, res) => {
       });
     }
 
-    // Add prayer request to user's array
-    user.prayerRequests.push({
-      request: request.trim(),
-      isPrivate: isPrivate || false,
-      createdAt: new Date(),
-      isAnswered: false,
-      prayerCount: 0
-    });
+    const newPrayerRequest = {
+      title,
+      description,
+      isPrivate,
+      prayerCount: 0,
+      isAnswered: false
+    };
 
+    user.prayerRequests.push(newPrayerRequest);
     await user.save();
+
+    // Get the newly created prayer request
+    const createdRequest = user.prayerRequests[user.prayerRequests.length - 1];
 
     res.status(201).json({
       success: true,
-      message: 'Prayer request added successfully',
+      message: 'Prayer request created successfully',
       data: {
-        prayerRequest: user.prayerRequests[user.prayerRequests.length - 1]
+        prayerRequest: createdRequest
       }
     });
 
   } catch (error) {
-    console.error('Add prayer request error:', error);
+    console.error('Create prayer request error:', error);
     res.status(500).json({
       success: false,
-      message: 'Server error while adding prayer request'
+      message: 'Server error while creating prayer request'
+    });
+  }
+});
+
+// @route   GET /api/users/prayer-requests
+// @desc    Get current user's prayer requests
+// @access  Private
+router.get('/prayer-requests', authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Prayer requests retrieved successfully',
+      data: {
+        prayerRequests: user.prayerRequests
+      }
+    });
+
+  } catch (error) {
+    console.error('Get prayer requests error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while retrieving prayer requests'
+    });
+  }
+});
+
+// @route   GET /api/users/prayer-requests/all
+// @desc    Get all public prayer requests from all users
+// @access  Private
+router.get('/prayer-requests/all', authenticateToken, async (req, res) => {
+  try {
+    const { page = 1, limit = 20 } = req.query;
+
+    // Get all users with public prayer requests
+    const users = await User.find({
+      isActive: true,
+      'prayerRequests.isPrivate': false,
+      'privacy.showPrayerRequests': true
+    }).select('firstName lastName profilePicture prayerRequests');
+
+    // Flatten all public prayer requests
+    let allPrayerRequests = [];
+    
+    users.forEach(user => {
+      const publicRequests = user.prayerRequests
+        .filter(request => !request.isPrivate && !request.isAnswered)
+        .map(request => ({
+          ...request.toObject(),
+          user: {
+            _id: user._id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            profilePicture: user.profilePicture
+          }
+        }));
+      
+      allPrayerRequests = allPrayerRequests.concat(publicRequests);
+    });
+
+    // Sort by date (newest first)
+    allPrayerRequests.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    // Paginate
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+    const paginatedRequests = allPrayerRequests.slice(startIndex, endIndex);
+
+    res.json({
+      success: true,
+      message: 'Public prayer requests retrieved successfully',
+      data: {
+        prayerRequests: paginatedRequests,
+        total: allPrayerRequests.length,
+        pages: Math.ceil(allPrayerRequests.length / limit),
+        currentPage: parseInt(page)
+      }
+    });
+
+  } catch (error) {
+    console.error('Get all prayer requests error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while retrieving prayer requests'
+    });
+  }
+});
+
+// @route   PUT /api/users/prayer-request/:id/pray
+// @desc    Increment prayer count for a prayer request
+// @access  Private
+router.put('/prayer-request/:id/pray', authenticateToken, async (req, res) => {
+  try {
+    const { userId } = req.body; // ID of the user who owns the prayer request
+    const prayerRequestId = req.params.id;
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'User ID is required'
+      });
+    }
+
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    const prayerRequest = user.prayerRequests.id(prayerRequestId);
+    
+    if (!prayerRequest) {
+      return res.status(404).json({
+        success: false,
+        message: 'Prayer request not found'
+      });
+    }
+
+    // Increment prayer count
+    prayerRequest.prayerCount += 1;
+    
+    // Update prayer stats for the requesting user
+    user.prayerStats.totalPrayersReceived += 1;
+    
+    // Update prayer stats for the praying user
+    const prayingUser = await User.findById(req.user._id);
+    if (prayingUser) {
+      prayingUser.prayerStats.totalPrayersOffered += 1;
+      await prayingUser.save();
+    }
+    
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Prayer recorded successfully',
+      data: {
+        prayerCount: prayerRequest.prayerCount,
+        yourTotalPrayers: prayingUser.prayerStats.totalPrayersOffered
+      }
+    });
+
+  } catch (error) {
+    console.error('Prayer count error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to record prayer'
     });
   }
 });
 
 // @route   PUT /api/users/prayer-request/:id
-// @desc    Update a prayer request (mark as answered, etc.)
+// @desc    Update prayer request (mark as answered)
 // @access  Private
 router.put('/prayer-request/:id', authenticateToken, async (req, res) => {
   try {
@@ -676,69 +857,61 @@ router.put('/prayer-request/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// @route   POST /api/users/pray/:userId/:prayerRequestId
-// @desc    Record prayer participation (anonymous count + personal stats)
-// @access  Private
-router.post('/pray/:userId/:prayerRequestId', authenticateToken, async (req, res) => {
-  try {
-    const { userId, prayerRequestId } = req.params;
-    const prayingUser = req.user; // The person praying
-    
-    // Find the user whose prayer we're praying for
-    const userWithPrayer = await User.findById(userId);
-    if (!userWithPrayer) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
-
-    // Increment prayer count on the request (anonymous)
-    const prayerRequest = userWithPrayer.prayerRequests.id(prayerRequestId);
-    if (!prayerRequest) {
-      return res.status(404).json({
-        success: false,
-        message: 'Prayer request not found'
-      });
-    }
-    
-    prayerRequest.prayerCount += 1;
-    await userWithPrayer.save();
-
-    // Increment the praying user's personal stats
-    prayingUser.prayerStats.totalPrayersOffered += 1;
-    prayingUser.prayerStats.lastPrayedAt = new Date();
-    await prayingUser.save();
-
-    res.json({
-      success: true,
-      message: 'Prayer recorded',
-      data: {
-        prayerCount: prayerRequest.prayerCount,
-        yourTotalPrayers: prayingUser.prayerStats.totalPrayersOffered
-      }
-    });
-
-  } catch (error) {
-    console.error('Prayer count error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to record prayer'
-    });
-  }
-});
-
 // @route   GET /api/users/public-profile/:userId
 // @desc    Get another user's public profile
 // @access  Private (must be logged in to view others)
 router.get('/public-profile/:userId', authenticateToken, async (req, res) => {
   try {
-    const user = await User.findById(req.params.userId);
+    const { userId } = req.params;
     
-    if (!user || !user.isActive) {
+    // Validate if userId is a valid MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid user ID format'
+      });
+    }
+    
+    const user = await User.findById(userId);
+    
+    if (!user) {
       return res.status(404).json({
         success: false,
         message: 'User not found'
+      });
+    }
+    
+    if (!user.isActive) {
+      return res.status(404).json({
+        success: false,
+        message: 'User profile is not available'
+      });
+    }
+
+    // Check if getPublicProfile method exists
+    if (typeof user.getPublicProfile !== 'function') {
+      console.error('getPublicProfile method not found on user model');
+      
+      // Fallback: manually create public profile
+      const publicProfile = {
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        profilePicture: user.profilePicture,
+        bio: user.bio,
+        location: user.privacy?.showLocation ? user.location : undefined,
+        relationshipStatus: user.privacy?.showRelationshipStatus ? user.relationshipStatus : undefined,
+        interests: user.privacy?.showInterests ? user.interests : undefined,
+        joinDate: user.joinDate,
+        prayerStats: user.prayerStats
+      };
+      
+      return res.json({
+        success: true,
+        message: 'Public profile retrieved successfully',
+        data: {
+          user: publicProfile
+        }
       });
     }
 
@@ -754,7 +927,8 @@ router.get('/public-profile/:userId', authenticateToken, async (req, res) => {
     console.error('Get public profile error:', error);
     res.status(500).json({
       success: false,
-      message: 'Server error while retrieving profile'
+      message: 'Server error while retrieving profile',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });

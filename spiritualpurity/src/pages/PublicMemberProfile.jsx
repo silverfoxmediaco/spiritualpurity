@@ -28,8 +28,16 @@ const PublicMemberProfile = () => {
     const userData = localStorage.getItem('user');
     
     if (token && userData) {
-      setCurrentUser(JSON.parse(userData));
+      try {
+        const parsedUser = JSON.parse(userData);
+        setCurrentUser(parsedUser);
+        return true;
+      } catch (e) {
+        console.error('Error parsing user data:', e);
+        return false;
+      }
     }
+    return false;
   }, []);
 
   const fetchMemberProfile = useCallback(async () => {
@@ -39,10 +47,16 @@ const PublicMemberProfile = () => {
       if (!token) {
         setError('Please log in to view member profiles');
         setLoading(false);
+        navigate('/login');
         return;
       }
 
+      // Log for debugging
+      console.log('Fetching profile for ID:', id);
+      console.log('Token exists:', !!token);
+
       const response = await fetch(`${API_CONFIG.BASE_URL}/api/users/public-profile/${id}`, {
+        method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -50,20 +64,31 @@ const PublicMemberProfile = () => {
       });
 
       const data = await response.json();
+      console.log('Profile response:', data);
 
       if (data.success) {
         setMember(data.data.user);
-        fetchConnectionStatus();
+        // Only fetch connection status if member data is loaded
+        if (data.data.user) {
+          await fetchConnectionStatus();
+        }
       } else {
         setError(data.message || 'Member not found');
+        
+        // If token is invalid, redirect to login
+        if (data.message === 'Invalid token' || data.message === 'Token expired') {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          navigate('/login');
+        }
       }
     } catch (error) {
       console.error('Error fetching member profile:', error);
-      setError('Network error. Please try again.');
+      setError('Network error. Please check your connection and try again.');
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, navigate]);
 
   const fetchConnectionStatus = async () => {
     try {
@@ -78,17 +103,12 @@ const PublicMemberProfile = () => {
       const data = await response.json();
       if (data.success) {
         setConnectionStatus(data.data.status);
-        setMutualConnections(data.data.mutualConnections);
+        setMutualConnections(data.data.mutualConnections || 0);
       }
     } catch (error) {
       console.error('Error fetching connection status:', error);
     }
   };
-
-  useEffect(() => {
-    checkCurrentUser();
-    fetchMemberProfile();
-  }, [checkCurrentUser, fetchMemberProfile]);
 
   const handleConnect = async () => {
     if (!currentUser) {
@@ -160,6 +180,7 @@ const PublicMemberProfile = () => {
 
       const data = await response.json();
       if (data.success) {
+        // Redirect to profile with a message to check their messages
         navigate('/profile');
         setTimeout(() => {
           alert(`Conversation started with ${member.firstName}! Check your Messages section below to continue chatting.`);
@@ -253,7 +274,7 @@ const PublicMemberProfile = () => {
     return `${API_CONFIG.BASE_URL}${profilePicture}`;
   };
 
-  // NEW: Create share data for profile
+  // Create share data for profile
   const createProfileShareData = () => {
     if (!member) return null;
     
@@ -264,6 +285,15 @@ const PublicMemberProfile = () => {
       imageUrl: getProfileImageUrl(member.profilePicture)
     };
   };
+
+  useEffect(() => {
+    const hasUser = checkCurrentUser();
+    if (hasUser && id) {
+      fetchMemberProfile();
+    } else if (!hasUser) {
+      navigate('/login');
+    }
+  }, [id, checkCurrentUser, fetchMemberProfile, navigate]);
 
   if (loading) {
     return (
@@ -351,7 +381,7 @@ const PublicMemberProfile = () => {
                       {member?.firstName} {member?.lastName}
                     </h1>
                     
-                    {/* NEW: Share Button for Profile */}
+                    {/* Share Button for Profile */}
                     <ShareButton
                       shareType="profile"
                       shareData={createProfileShareData()}
@@ -512,24 +542,21 @@ const PublicMemberProfile = () => {
                         
                         <div className={styles.prayerRequests}>
                           {member.prayerRequests
-                            .filter(prayer => !prayer.isPrivate)
+                            .filter(prayer => !prayer.isPrivate) // Only show public prayers
                             .length > 0 ? (
                             member.prayerRequests
                               .filter(prayer => !prayer.isPrivate)
                               .map((prayer) => (
                                 <div key={prayer._id} className={`${styles.prayerCard} ${prayer.isAnswered ? styles.answered : ''}`}>
                                   <div className={styles.prayerContent}>
-                                    <p>{prayer.request || ''}</p>
+                                    <h4>{prayer.title}</h4>
+                                    <p>{prayer.description}</p>
+                                    
                                     <div className={styles.prayerMeta}>
-                                      <span className={styles.prayerDate}>
-                                        {new Date(prayer.createdAt).toLocaleDateString()}
+                                      <span className={styles.prayerCount}>
+                                        <span className="material-icons">volunteer_activism</span>
+                                        {prayer.prayerCount || 0} prayers
                                       </span>
-                                      {prayer.prayerCount > 0 && (
-                                        <span className={styles.prayerCountBadge}>
-                                          <span className="material-icons">people</span>
-                                          {prayer.prayerCount} praying
-                                        </span>
-                                      )}
                                       {prayer.isAnswered && (
                                         <span className={styles.answeredTag}>
                                           <span className="material-icons">check_circle</span>
@@ -594,7 +621,7 @@ const PublicMemberProfile = () => {
                           Prayer Wall
                         </button>
                         
-                        {/* NEW: Share Profile Action */}
+                        {/* Share Profile Action */}
                         <ShareButton
                           shareType="profile"
                           shareData={createProfileShareData()}
